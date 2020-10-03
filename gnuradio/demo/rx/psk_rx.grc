@@ -1,0 +1,1152 @@
+options:
+  parameters:
+    author: david
+    category: '[GRC Hier Blocks]'
+    cmake_opt: ''
+    comment: ''
+    copyright: ''
+    description: ''
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: qt_gui
+    hier_block_src_path: '.:'
+    id: psk_rx
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: PSK Receiver
+    window_size: ''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: downsampling
+  id: variable
+  parameters:
+    comment: ''
+    value: '2'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [104, 180.0]
+    rotation: 0
+    state: enabled
+- name: fec_ndata
+  id: variable
+  parameters:
+    comment: ''
+    value: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1200, 108.0]
+    rotation: 0
+    state: enabled
+- name: fec_ntotal
+  id: variable
+  parameters:
+    comment: ''
+    value: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1112, 108.0]
+    rotation: 0
+    state: enabled
+- name: fec_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: fec_ntotal / fec_ndata
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1288, 108.0]
+    rotation: 0
+    state: enabled
+- name: fill_size_bits
+  id: variable
+  parameters:
+    comment: ''
+    value: payload_size_bits - msg_size_bits
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [200, 108.0]
+    rotation: 0
+    state: enabled
+- name: frac_resampling
+  id: variable
+  parameters:
+    comment: ''
+    value: '5'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 12.0]
+    rotation: 0
+    state: enabled
+- name: frame_size_bits
+  id: variable
+  parameters:
+    comment: ''
+    value: '250'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [568, 108.0]
+    rotation: 0
+    state: enabled
+- name: frame_size_samples
+  id: variable
+  parameters:
+    comment: ''
+    value: frame_size_symbols * upsampling
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 108.0]
+    rotation: 0
+    state: enabled
+- name: frame_size_symbols
+  id: variable
+  parameters:
+    comment: ''
+    value: int(frame_size_bits / modulation.bits_per_symbol)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 108.0]
+    rotation: 0
+    state: enabled
+- name: freq
+  id: variable
+  parameters:
+    comment: ''
+    value: 220e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 12.0]
+    rotation: 0
+    state: enabled
+- name: freq_correction
+  id: variable
+  parameters:
+    comment: ''
+    value: '40'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 12.0]
+    rotation: 0
+    state: true
+- name: mod_amplitude
+  id: variable
+  parameters:
+    comment: ''
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1144, 180.0]
+    rotation: 0
+    state: enabled
+- name: mod_labels
+  id: variable
+  parameters:
+    comment: ''
+    value: '[0, 1, 3, 2]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1040, 180.0]
+    rotation: 0
+    state: enabled
+- name: mod_phase_offset
+  id: variable
+  parameters:
+    comment: ''
+    value: np.pi / 4
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1264, 180.0]
+    rotation: 0
+    state: enabled
+- name: mod_preamble
+  id: variable
+  parameters:
+    comment: ''
+    value: sksdr.PSKModulator(modulation, mod_labels, mod_amplitude, mod_phase_offset).modulate(np.repeat(sksdr.UNIPOLAR_BARKER_SEQ[13],
+      2))
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [680, 180.0]
+    rotation: 0
+    state: true
+- name: modulation
+  id: variable
+  parameters:
+    comment: ''
+    value: sksdr.QPSK
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [864, 180.0]
+    rotation: 0
+    state: enabled
+- name: msg_size
+  id: variable
+  parameters:
+    comment: ''
+    value: '15'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 108.0]
+    rotation: 0
+    state: enabled
+- name: msg_size_bits
+  id: variable
+  parameters:
+    comment: ''
+    value: msg_size * 8
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [96, 108.0]
+    rotation: 0
+    state: enabled
+- name: payload_fec_size_bits
+  id: variable
+  parameters:
+    comment: ''
+    value: int(payload_size_bits * fec_rate)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 108.0]
+    rotation: 0
+    state: enabled
+- name: payload_size_bits
+  id: variable
+  parameters:
+    comment: ''
+    value: '224'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [296, 108.0]
+    rotation: 0
+    state: enabled
+- name: preamble
+  id: variable
+  parameters:
+    comment: ''
+    value: np.repeat(sksdr.UNIPOLAR_BARKER_SEQ[13], 2)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [512, 180.0]
+    rotation: 0
+    state: enabled
+- name: rrc_coeffs
+  id: variable
+  parameters:
+    comment: ''
+    value: sksdr.rrc(upsampling, 0.5, 10)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 180.0]
+    rotation: 0
+    state: enabled
+- name: rx_filter_sps
+  id: variable
+  parameters:
+    comment: ''
+    value: int(upsampling / downsampling)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [216, 180.0]
+    rotation: 0
+    state: enabled
+- name: rx_frame_size_samples
+  id: variable
+  parameters:
+    comment: ''
+    value: int(frame_size_samples / downsampling)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [960, 108.0]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: 1.024e6
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [384, 12.0]
+    rotation: 0
+    state: enabled
+- name: upsampling
+  id: variable
+  parameters:
+    comment: ''
+    value: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 180.0]
+    rotation: 0
+    state: enabled
+- name: blocks_char_to_float_0
+  id: blocks_char_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: '1'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1632, 644.0]
+    rotation: 0
+    state: disabled
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: test.iq
+    type: complex
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 548.0]
+    rotation: 0
+    state: disabled
+- name: blocks_file_source_0
+  id: blocks_file_source
+  parameters:
+    affinity: ''
+    alias: ''
+    begin_tag: pmt.PMT_NIL
+    comment: ''
+    file: test.iq
+    length: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    offset: '0'
+    repeat: 'True'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [72, 260.0]
+    rotation: 0
+    state: disabled
+- name: blocks_null_sink_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 720.0]
+    rotation: 0
+    state: enabled
+- name: blocks_null_sink_0_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1112, 896.0]
+    rotation: 0
+    state: enabled
+- name: blocks_null_sink_0_0_0
+  id: blocks_null_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    bus_structure_sink: '[[0,],]'
+    comment: ''
+    num_inputs: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [928, 784.0]
+    rotation: 0
+    state: enabled
+- name: blocks_throttle_1
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: samp_rate
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [296, 292.0]
+    rotation: 0
+    state: disabled
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\nimport logging\n\nimport\
+      \ numpy as np\n\nimport sksdr\nfrom gnuradio import gr\n\n_log = logging.getLogger(__name__)\n\
+      #_log.setLevel(logging.DEBUG)\n\n\nclass blk(gr.sync_block):  # other base classes\
+      \ are basic_block, decim_block, interp_block\n    \"\"\"Embedded Python Block\
+      \ example - a simple multiply const\"\"\"\n\n    def __init__(self, message_size=1,\
+      \ payload_size_bits=1):  # only default arguments here\n        \"\"\"arguments\
+      \ to this function show up as parameters in GRC\"\"\"\n        self.message_size\
+      \ = message_size\n        self.payload_size_bits = payload_size_bits\n     \
+      \   gr.sync_block.__init__(\n            self,\n            name='decode_frame',\
+      \   # will show up in GRC\n            in_sig=[np.uint8],\n            out_sig=[np.uint8]\n\
+      \        )\n        self.set_output_multiple(self.payload_size_bits)\n\n   \
+      \ def work(self, input_items, output_items):\n        in0 = input_items[0]\n\
+      \        out = output_items[0]  \n        for i in range(0, len(in0), self.payload_size_bits):\n\
+      \            rxbits = in0[i : i + self.message_size * 8]\n            rx_msg\
+      \ = sksdr.binlist2x(rxbits, 8)\n            rx_msg_ascii = [chr(x) for x in\
+      \ rx_msg]\n            print(rx_msg_ascii)\n        \n        return len(in0)\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    message_size: msg_size
+    minoutbuf: '0'
+    payload_size_bits: payload_size_bits
+  states:
+    _io_cache: ('decode_frame', 'blk', [('message_size', '1'), ('payload_size_bits',
+      '1')], [('0', 'byte', 1)], [('0', 'byte', 1)], 'Embedded Python Block example
+      - a simple multiply const', ['message_size', 'payload_size_bits'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [904, 884.0]
+    rotation: 0
+    state: enabled
+- name: grsksdr_agc_1
+  id: grsksdr_agc
+  parameters:
+    affinity: ''
+    alias: ''
+    avg_len: frame_size_samples
+    comment: ''
+    det_gain: '0.01'
+    max_gain: '60'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ref_power: '0.25'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [608, 420.0]
+    rotation: 0
+    state: true
+- name: grsksdr_coarse_freq_comp_0
+  id: grsksdr_coarse_freq_comp
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    frame_size: rx_frame_size_samples
+    freq_res: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mod_order: modulation.order
+    sample_rate: samp_rate/frac_resampling
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1200, 420.0]
+    rotation: 0
+    state: true
+- name: grsksdr_descrambler_0
+  id: grsksdr_descrambler
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    init_state: '[0, 1, 1, 0]'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    poly: '[1, 1, 1, 0, 1]'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [528, 884.0]
+    rotation: 0
+    state: enabled
+- name: grsksdr_fir_decimator_0
+  id: grsksdr_fir_decimator
+  parameters:
+    affinity: ''
+    alias: ''
+    coeffs: rrc_coeffs
+    comment: ''
+    downsampling: downsampling
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [944, 436.0]
+    rotation: 0
+    state: true
+- name: grsksdr_frame_sync_0
+  id: grsksdr_frame_sync
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    frame_size: frame_size_symbols
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    preamble: mod_preamble
+    threshold: '8.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [672, 684.0]
+    rotation: 0
+    state: true
+- name: grsksdr_freq_sync_0
+  id: grsksdr_freq_sync
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    damp_factor: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    modulation: '''sksdr.QPSK'''
+    norm_loop_bw: '0.01'
+    sps: rx_filter_sps
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [64, 660.0]
+    rotation: 0
+    state: true
+- name: grsksdr_hamming_decoder_0
+  id: grsksdr_hamming_decoder
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ndata: fec_ndata
+    ntotal: fec_ntotal
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [256, 884.0]
+    rotation: 0
+    state: disabled
+- name: grsksdr_phase_offset_est_0
+  id: grsksdr_phase_offset_est
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    frame_size: frame_size_symbols
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    preamble: mod_preamble
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [920, 692.0]
+    rotation: 0
+    state: enabled
+- name: grsksdr_psk_demod_0
+  id: grsksdr_psk_demod
+  parameters:
+    affinity: ''
+    alias: ''
+    amplitude: mod_amplitude
+    comment: ''
+    labels: mod_labels
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    modulation: '''sksdr.QPSK'''
+    phase_offset: mod_phase_offset
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1152, 676.0]
+    rotation: 0
+    state: enabled
+- name: grsksdr_symbol_sync_0
+  id: grsksdr_symbol_sync
+  parameters:
+    A: 1/np.sqrt(2)
+    K: '1'
+    affinity: ''
+    alias: ''
+    comment: ''
+    damp_factor: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    modulation: '''sksdr.QPSK'''
+    norm_loop_bw: '0.01'
+    sps: rx_filter_sps
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [392, 660.0]
+    rotation: 0
+    state: true
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import sksdr
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [272, 12.0]
+    rotation: 0
+    state: true
+- name: import_0_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import numpy as np
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 12.0]
+    rotation: 0
+    state: true
+- name: mmse_resampler_xx_0
+  id: mmse_resampler_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    phase_shift: '0'
+    resamp_ratio: frac_resampling
+    type: complex
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [368, 416.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_freq_sink_x_0
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '1.0'
+    axislabels: 'True'
+    bw: samp_rate/frac_resampling
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    ctrlpanel: 'False'
+    fc: '0'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label: Relative Gain
+    label1: ''
+    label10: ''''''
+    label2: ''''''
+    label3: ''''''
+    label4: ''''''
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    units: dB
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: firdes.WIN_BLACKMAN_hARRIS
+    ymax: '10'
+    ymin: '-140'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1552, 480.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_1
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '1'
+    size: '1024'
+    srate: samp_rate/frac_resampling
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: complex
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1544, 364.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_time_sink_x_1_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '0'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '1'
+    size: '1024'
+    srate: samp_rate/frac_resampling
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1784, 628.0]
+    rotation: 0
+    state: disabled
+- name: snippet_0
+  id: snippet
+  parameters:
+    alias: ''
+    code: 'import logging
+
+      logging.getLogger(''grsksdr.frame_sync'').setLevel(logging.DEBUG-1)
+
+      logging.getLogger(''grsksdr.phase_offset_est'').setLevel(logging.DEBUG)
+
+      logging.getLogger(''grsksdr.descramber'').setLevel(logging.DEBUG)
+
+      logging.getLogger(''grsksdr.hamming_decoder'').setLevel(logging.DEBUG)'
+    comment: ''
+    priority: ''
+    section: main_after_init
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [824, 12.0]
+    rotation: 0
+    state: true
+- name: soapy_source_1
+  id: soapy_source
+  parameters:
+    affinity: ''
+    agc0: 'False'
+    agc1: 'False'
+    alias: ''
+    amp_gain0: '0'
+    ant0: RX
+    ant1: RX2
+    args: ''
+    balance0: '0'
+    balance1: '0'
+    bw0: '0'
+    bw1: '0'
+    center_freq0: freq
+    center_freq1: '0'
+    clock_rate: '0'
+    clock_source: ''
+    comment: ''
+    correction0: freq_correction
+    correction1: '0'
+    dc_offset0: '0'
+    dc_offset1: '0'
+    dc_removal0: 'False'
+    dc_removal1: 'True'
+    dev: driver=rtlsdr
+    devname: rtlsdr
+    gain_mode0: Overall
+    gain_mode1: Overall
+    ifgr_gain: '59'
+    lna_gain0: '10'
+    lna_gain1: '10'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mix_gain0: '10'
+    nchan: '1'
+    nco_freq0: '0'
+    nco_freq1: '0'
+    overall_gain0: '0'
+    overall_gain1: '10'
+    pga_gain0: '24'
+    pga_gain1: '24'
+    rfgr_gain: '9'
+    rxvga1_gain: '5'
+    rxvga2_gain: '0'
+    samp_rate: samp_rate
+    sdrplay_agc_setpoint: '-30'
+    sdrplay_biastee: 'False'
+    sdrplay_dabnotch: 'False'
+    sdrplay_if_mode: Zero-IF
+    sdrplay_rfnotch: 'False'
+    settings0: ''
+    settings1: ''
+    stream_args: ''
+    tia_gain0: '0'
+    tia_gain1: '0'
+    tune_args0: ''
+    tune_args1: ''
+    tuner_gain0: '20'
+    type: fc32
+    vga_gain0: '10'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [56, 388.0]
+    rotation: 0
+    state: enabled
+- name: stream_demux_stream_demux_0
+  id: stream_demux_stream_demux
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    lengths: '[len(preamble), payload_fec_size_bits]'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_outputs: '2'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1360, 688.0]
+    rotation: 0
+    state: true
+
+connections:
+- [blocks_char_to_float_0, '0', qtgui_time_sink_x_1_0, '0']
+- [blocks_file_source_0, '0', blocks_throttle_1, '0']
+- [blocks_throttle_1, '0', mmse_resampler_xx_0, '0']
+- [epy_block_0, '0', blocks_null_sink_0_0, '0']
+- [grsksdr_agc_1, '0', grsksdr_fir_decimator_0, '0']
+- [grsksdr_coarse_freq_comp_0, '0', grsksdr_freq_sync_0, '0']
+- [grsksdr_coarse_freq_comp_0, '0', qtgui_freq_sink_x_0, '0']
+- [grsksdr_coarse_freq_comp_0, '0', qtgui_time_sink_x_1, '0']
+- [grsksdr_descrambler_0, '0', epy_block_0, '0']
+- [grsksdr_fir_decimator_0, '0', grsksdr_coarse_freq_comp_0, '0']
+- [grsksdr_frame_sync_0, '0', blocks_null_sink_0_0_0, '0']
+- [grsksdr_frame_sync_0, '0', grsksdr_phase_offset_est_0, '0']
+- [grsksdr_freq_sync_0, '0', grsksdr_symbol_sync_0, '0']
+- [grsksdr_phase_offset_est_0, '0', grsksdr_psk_demod_0, '0']
+- [grsksdr_psk_demod_0, '0', stream_demux_stream_demux_0, '0']
+- [grsksdr_symbol_sync_0, '0', grsksdr_frame_sync_0, '0']
+- [mmse_resampler_xx_0, '0', grsksdr_agc_1, '0']
+- [soapy_source_1, '0', blocks_file_sink_0, '0']
+- [soapy_source_1, '0', mmse_resampler_xx_0, '0']
+- [stream_demux_stream_demux_0, '0', blocks_char_to_float_0, '0']
+- [stream_demux_stream_demux_0, '0', blocks_null_sink_0, '0']
+- [stream_demux_stream_demux_0, '1', grsksdr_descrambler_0, '0']
+
+metadata:
+  file_format: 1
