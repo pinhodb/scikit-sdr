@@ -14,8 +14,8 @@ class AWGNChannel:
     """
     def __init__(self, snr: float = np.inf, signal_power: Union[int, str] = 'measured'):
         """
-        :param snr: The desired SNR (dB)
-        :param signal_power: The desired signal power (linear units), or a string if the signal is to be measured on each :meth:`__call__()`.
+        :param snr: Desired SNR (dB)
+        :param signal_power: Desired signal power (linear units), or a string if the signal is to be measured on each :meth:`__call__()`.
         """
         self.snr = snr
         self.signal_power = signal_power
