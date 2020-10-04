@@ -1,12 +1,21 @@
 language: python
 
 python:
-    - "3.6"
+  - '3.6'
 
 install:
-    - pip install -r requirements.txt
-    - python setup.py install
+  - pip install -r requirements.txt
+  - python setup.py install
 
 script:
-#    - pytest sksdr/ --doctest-modules
-    - pytest tests/
+  - pytest tests/
+  # - pytest sksdr/ --doctest-modules
+
+deploy:
+  provider: pypi
+  username: __token__
+  password:
+    secure: N4upQeOCnlYXbK6Ho5phHze1AGqkQ+n5Q2Wu5YDW9jwNzk6dm1E3uTwgPz7XeMPoE2NKhNwk4Gcuj66lzD+1f/yzqUnX6FLYPPxY2gPheQlCGIfV5jmA29agTip2/R+fLkPlqdImOZcw/UG8CbV62Rw/ANnRNgusJS6BddT1Ucnsmra8WXBrqVbaIfByIf45TK4vMmtO396ldQqVlSIYo/tkKZTK9Y6fusCvueyy2Ivr0ehi9W/dxbQGYRreefiNEsZ0qMBjOkH/5R5SbeVR+3qtfLlKgp+jOYL2LGEhlj3fggvH/8X0LIz7Vci32KmTJeHlvYyCXztSrsrK2uLS7CEY969dutWCEuzMd9yPeLtpoJ7ODJsLcc3zqCayD4DloQGShyIMQ4N3mtrmYo7c8P1h/hQcpiSJdFLeFjbhg/OSuN26pOXFpKboM2Mqg3WUDAgq08XpTf0i9KtNu1dODRFTh1F0p1FS1KMsysBk9JowtxuQqmP6ESHiW7IemC7mc3gIOXV8jxhQ59ST47X2RutU/mjuOVBYacRAvtZtJKgfbPn9r3lZ39CoUK9kxroPX2wY1Gh+Y2/uy0mIOL1pZLPlIn9zZTVy5lnUvJoQrNCuaRb7SmEnYkSc8F7+t+3lnO1eYInMtGewX4ghyKK8AhHxxB9cxsiHDxORLQ45FqQ=
+  on:
+    branch: main
+  skip_cleanup: true
