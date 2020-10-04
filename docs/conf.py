@@ -38,7 +38,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'sphinx.ext.mathjax',
-    'sphinx.ext.intersphinx', # Link to other project's documentation (see mapping below)
+    'sphinx.ext.intersphinx', # link to other project's documentation (see mapping below)
     'sphinx.ext.viewcode',
     'sphinxcontrib.bibtex',
     'sphinx_autodoc_typehints', # automatically document param types (less noise in class signature)
@@ -50,6 +50,7 @@ intersphinx_mapping = {
     "SciPy [latest]": ('https://docs.scipy.org/doc/scipy/reference', None),
     "matplotlib [latest]": ('https://matplotlib.org', None)
 }
+
 autosummary_generate = True
 autodoc_member_order = 'bysource'
 autodoc_default_flags = ['members', 'show-inheritance']

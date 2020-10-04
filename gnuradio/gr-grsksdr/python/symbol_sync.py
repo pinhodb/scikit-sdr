@@ -37,8 +37,8 @@ class symbol_sync(gr.basic_block):
         self.sps = sps
         gr.basic_block.__init__(self,
                                 name='symbol_sync',
-                                in_sig=[np.csingle],
-                                out_sig=[np.csingle])
+                                in_sig=[np.complex64],
+                                out_sig=[np.complex64])
         self.ssync = sksdr.SymbolSync(eval(modulation), sps, damp_factor, norm_loop_bw, K, A)
 
     def forecast(self, noutput_items, ninput_items_required):

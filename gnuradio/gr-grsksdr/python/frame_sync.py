@@ -37,8 +37,8 @@ class frame_sync(gr.basic_block):
         self.frame_size = frame_size
         gr.basic_block.__init__(self,
                                 name='frame_sync',
-                                in_sig=[np.csingle],
-                                out_sig=[np.csingle])
+                                in_sig=[np.complex64],
+                                out_sig=[np.complex64])
         self.frame_sync = sksdr.FrameSync(preamble, det_thr, frame_size)
         # self.psk = sksdr.PSKModulator(sksdr.QPSK, [0, 1, 3, 2], 1.0, np.pi/4)
         # self.preamble = np.repeat(sksdr.UNIPOLAR_BARKER_SEQ[13], 2)

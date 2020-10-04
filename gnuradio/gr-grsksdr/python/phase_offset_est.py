@@ -36,8 +36,8 @@ class phase_offset_est(gr.sync_block):
         self.frame_size = frame_size
         gr.sync_block.__init__(self,
                                name='phase_offset_est',
-                               in_sig=[np.csingle],
-                               out_sig=[np.csingle])
+                               in_sig=[np.complex64],
+                               out_sig=[np.complex64])
         self.phase_off_est = sksdr.PhaseOffsetEst(preamble)
         self.set_output_multiple(self.frame_size)
 

@@ -35,8 +35,8 @@ class fir_interpolator(gr.interp_block):
     def __init__(self, upsampling, coeffs):
         gr.interp_block.__init__(self,
                                  name='fir_interpolator',
-                                 in_sig=[np.csingle],
-                                 out_sig=[np.csingle], interp=upsampling)
+                                 in_sig=[np.complex64],
+                                 out_sig=[np.complex64], interp=upsampling)
         self.interp = sksdr.FirInterpolator(upsampling, coeffs)
 
     def work(self, input_items, output_items):

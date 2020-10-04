@@ -36,8 +36,8 @@ class coarse_freq_comp(gr.sync_block):
         self.frame_size = frame_size
         gr.sync_block.__init__(self,
                                name='coarse_freq_comp',
-                               in_sig=[np.csingle],
-                               out_sig=[np.csingle])
+                               in_sig=[np.complex64],
+                               out_sig=[np.complex64])
         self.cfc = sksdr.CoarseFrequencyComp(mod_order, sample_rate, freq_res)
         self.set_output_multiple(self.frame_size)
 

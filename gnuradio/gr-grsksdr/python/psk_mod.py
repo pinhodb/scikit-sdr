@@ -37,7 +37,7 @@ class psk_mod(gr.decim_block):
         gr.decim_block.__init__(self,
                                 name="psk_mod",
                                 in_sig=[np.uint8],
-                                out_sig=[np.csingle], decim=mod.bits_per_symbol)
+                                out_sig=[np.complex64], decim=mod.bits_per_symbol)
         self.psk = sksdr.PSKModulator(mod, labels, amplitude, phase_offset)
 
     def work(self, input_items, output_items):

@@ -1,50 +1,30 @@
-from setuptools import setup
-
-import sksdr
+from setuptools import setup, find_packages
 
 with open('README.md', 'r') as fh:
     long_description = fh.read()
 
-DISTNAME         = 'scikit-sdr'
-DESCRIPTION      = 'SDR scikit package'
-LONG_DESCRIPTION = long_description
-AUTHOR           = 'David Pi'
-AUTHOR_EMAIL     = 'david.pinho@gmail.com'
-MAINTAINER       = 'David Pi'
-MAINTAINER_EMAIL = 'david.pinho@gmail.com'
-URL              = 'https://github.com/dave-pi/scikit-sdr'
-LICENSE          = 'MIT'
-DOWNLOAD_URL     = URL
-PACKAGE_NAME     = 'sksdr'
-EXTRA_INFO       = dict(
-    python_requires='>=3.6',
-    install_requires=['matplotlib', 'numpy', 'scipy'],
-    classifiers=['Development Status :: 1 - Planning',
-                 'Intended Audience :: Developers',
-                 'Intended Audience :: Science/Research',
-                 'License :: OSI Approved :: BSD License',
-                 'Topic :: Scientific/Engineering']
-)
-
-VERSION = sksdr.__version__
-
 # Call the setup function
 if __name__ == '__main__':
-    setup(name=DISTNAME,
-          author=AUTHOR,
-          author_email=AUTHOR_EMAIL,
-          maintainer=MAINTAINER,
-          maintainer_email=MAINTAINER_EMAIL,
-          description=DESCRIPTION,
-          license=LICENSE,
-          url=URL,
-          download_url=DOWNLOAD_URL,
-          packages=['sksdr'],
-          long_description=LONG_DESCRIPTION,
-          long_description_content_type='text/markdown',
-          include_package_data=True,
-          test_suite='tests',
-          setup_requires=['pytest-runner'],
-          tests_require=['pytest'],
-          version=VERSION,
-          **EXTRA_INFO)
+    setup(
+        name='scikit-sdr',
+        version='0.2.dev0',
+        description='Python 3 library that provides algorithms for building digital communication systems and for experimenting with DSP and SDR',
+        long_description=long_description,
+        long_description_content_type='text/markdown',
+        url='https://github.com/dave-pi/scikit-sdr',
+        author='David Pi',
+        author_email='david.pinho@gmail.com',
+        license='GPLv3+',
+        project_urls={
+            'Documentation': 'http://komm.readthedocs.io/',
+            'Source': 'https://github.com/rwnobrega/komm/'},
+        packages=find_packages(exclude=['gnuradio', 'docs', 'tests*']),
+        test_suite='tests',
+        setup_requires=['pytest-runner'],
+        tests_require=['pytest'],
+        python_requires='>=3.6',
+        install_requires=['numpy>=1.19.1', 'scipy>=1.5.2', 'matplotlib>=3.2.1'],
+        classifiers=[
+            'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+            'Intended Audience :: Science/Research',
+            'Topic :: Scientific/Engineering'])

@@ -35,8 +35,8 @@ class freq_sync(gr.sync_block):
     def __init__(self, modulation, sps, damp_factor, norm_loop_bw):
         gr.sync_block.__init__(self,
             name='freq_sync',
-            in_sig=[np.csingle],
-            out_sig=[np.csingle])
+            in_sig=[np.complex64],
+            out_sig=[np.complex64])
         self.fsync = sksdr.FrequencySync(eval(modulation), sps, damp_factor, norm_loop_bw)
 
     def work(self, input_items, output_items):

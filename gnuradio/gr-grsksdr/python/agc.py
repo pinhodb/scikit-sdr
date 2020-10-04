@@ -36,8 +36,8 @@ class agc(gr.sync_block):
     def __init__(self, ref_power, max_gain, det_gain, avg_len):
         gr.sync_block.__init__(self,
                                name='agc',
-                               in_sig=[np.csingle],
-                               out_sig=[np.csingle])
+                               in_sig=[np.complex64],
+                               out_sig=[np.complex64])
         self.agc = sksdr.AGC(ref_power, max_gain, det_gain, avg_len)
 
     def work(self, input_items, output_items):

@@ -36,8 +36,8 @@ class fir_decimator(gr.decim_block):
         self.downsampling = downsampling
         gr.decim_block.__init__(self,
                                 name='fir_decimator',
-                                in_sig=[np.csingle],
-                                out_sig=[np.csingle],
+                                in_sig=[np.complex64],
+                                out_sig=[np.complex64],
                                 decim=downsampling)
         self.decim = sksdr.FirDecimator(self.downsampling, coeffs)
 

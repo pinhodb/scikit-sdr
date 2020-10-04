@@ -36,7 +36,7 @@ class psk_demod(gr.interp_block):
         mod = eval(modulation)
         gr.interp_block.__init__(self,
                                  name='psk_demod',
-                                 in_sig=[np.csingle],
+                                 in_sig=[np.complex64],
                                  out_sig=[np.uint8], interp=mod.bits_per_symbol)
         self.psk = sksdr.PSKModulator(mod, labels, amplitude, phase_offset)
 
