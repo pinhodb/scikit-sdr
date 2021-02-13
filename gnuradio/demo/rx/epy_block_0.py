@@ -8,16 +8,15 @@ be the parameters. All of them are required to have default values!
 import logging
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)
 
 
 class blk(gr.sync_block):  # other base classes are basic_block, decim_block, interp_block
-    """Embedded Python Block example"""
+    """Embedded Python Block example - a simple multiply const"""
 
     def __init__(self, message_size=1, payload_size_bits=1):  # only default arguments here
         """arguments to this function show up as parameters in GRC"""

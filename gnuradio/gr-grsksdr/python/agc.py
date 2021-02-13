@@ -22,9 +22,8 @@ import logging
 from logging import DEBUG
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)

@@ -6,6 +6,7 @@ import logging
 from .agc import *
 from .channels import *
 from .coarse_freq_comp import *
+from .costas_loop import *
 from .fec import *
 from .frame_sync import *
 from .freq_sync import *
@@ -49,4 +50,5 @@ _setupLog()
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 from pkg_resources import get_distribution as _get_distribution
+
 __version__ = _get_distribution('scikit-sdr').version

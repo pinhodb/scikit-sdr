@@ -37,10 +37,9 @@ from stream_demux import stream_demux_swig
 import epy_block_0
 import grsksdr
 import numpy as np
+import osmosdr
+import time
 import sksdr
-import soapy
-import distutils
-from distutils import util
 
 from gnuradio import qtgui
 
@@ -111,55 +110,21 @@ class psk_rx(gr.top_block, Qt.QWidget):
         # Blocks
         ##################################################
         self.stream_demux_stream_demux_0 = stream_demux_swig.stream_demux(gr.sizeof_char*1, [len(preamble), payload_fec_size_bits])
-        self.soapy_source_1 = None
-        # Make sure that the gain mode is valid
-        if('Overall' not in ['Overall', 'Specific', 'Settings Field']):
-            raise ValueError("Wrong gain mode on channel 0. Allowed gain modes: "
-                  "['Overall', 'Specific', 'Settings Field']")
-
-        dev = 'driver=rtlsdr'
-
-        # Stream arguments for every activated stream
-        tune_args = ['']
-        settings = ['']
-
-        # Setup the device arguments
-        dev_args = ''
-
-        self.soapy_source_1 = soapy.source(1, dev, dev_args, '',
-                                  tune_args, settings, samp_rate, "fc32")
-
-
-
-        self.soapy_source_1.set_dc_removal(0,bool(distutils.util.strtobool('False')))
-
-        # Set up DC offset. If set to (0, 0) internally the source block
-        # will handle the case if no DC offset correction is supported
-        self.soapy_source_1.set_dc_offset(0,0)
-
-        # Setup IQ Balance. If set to (0, 0) internally the source block
-        # will handle the case if no IQ balance correction is supported
-        self.soapy_source_1.set_iq_balance(0,0)
-
-        self.soapy_source_1.set_agc(0,False)
-
-        # generic frequency setting should be specified first
-        self.soapy_source_1.set_frequency(0, freq)
-
-        self.soapy_source_1.set_frequency(0,"BB",0)
-
-        # Setup Frequency correction. If set to 0 internally the source block
-        # will handle the case if no frequency correction is supported
-        self.soapy_source_1.set_frequency_correction(0,freq_correction)
-
-        self.soapy_source_1.set_antenna(0,'RX')
-
-        self.soapy_source_1.set_bandwidth(0,0)
-
-        if('Overall' != 'Settings Field'):
-            # pass is needed, in case the template does not evaluare anything
-            pass
-            self.soapy_source_1.set_gain(0,0)
+        self.rtlsdr_source_0 = osmosdr.source(
+            args="numchan=" + str(1) + " " + ""
+        )
+        self.rtlsdr_source_0.set_time_unknown_pps(osmosdr.time_spec_t())
+        self.rtlsdr_source_0.set_sample_rate(samp_rate)
+        self.rtlsdr_source_0.set_center_freq(freq, 0)
+        self.rtlsdr_source_0.set_freq_corr(0, 0)
+        self.rtlsdr_source_0.set_dc_offset_mode(0, 0)
+        self.rtlsdr_source_0.set_iq_balance_mode(0, 0)
+        self.rtlsdr_source_0.set_gain_mode(False, 0)
+        self.rtlsdr_source_0.set_gain(10, 0)
+        self.rtlsdr_source_0.set_if_gain(20, 0)
+        self.rtlsdr_source_0.set_bb_gain(20, 0)
+        self.rtlsdr_source_0.set_antenna('', 0)
+        self.rtlsdr_source_0.set_bandwidth(0, 0)
         self.qtgui_time_sink_x_1 = qtgui.time_sink_c(
             1024, #size
             samp_rate/frac_resampling, #samp_rate
@@ -284,7 +249,7 @@ class psk_rx(gr.top_block, Qt.QWidget):
         self.connect((self.grsksdr_psk_demod_0, 0), (self.stream_demux_stream_demux_0, 0))
         self.connect((self.grsksdr_symbol_sync_0, 0), (self.grsksdr_frame_sync_0, 0))
         self.connect((self.mmse_resampler_xx_0, 0), (self.grsksdr_agc_1, 0))
-        self.connect((self.soapy_source_1, 0), (self.mmse_resampler_xx_0, 0))
+        self.connect((self.rtlsdr_source_0, 0), (self.mmse_resampler_xx_0, 0))
         self.connect((self.stream_demux_stream_demux_0, 0), (self.blocks_null_sink_0, 0))
         self.connect((self.stream_demux_stream_demux_0, 1), (self.grsksdr_descrambler_0, 0))
 
@@ -412,6 +377,7 @@ class psk_rx(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate/self.frac_resampling)
         self.qtgui_time_sink_x_1.set_samp_rate(self.samp_rate/self.frac_resampling)
+        self.rtlsdr_source_0.set_sample_rate(self.samp_rate)
 
     def get_rx_frame_size_samples(self):
         return self.rx_frame_size_samples
@@ -454,14 +420,13 @@ class psk_rx(gr.top_block, Qt.QWidget):
 
     def set_freq_correction(self, freq_correction):
         self.freq_correction = freq_correction
-        self.soapy_source_1.set_frequency_correction(0,self.freq_correction)
 
     def get_freq(self):
         return self.freq
 
     def set_freq(self, freq):
         self.freq = freq
-        self.soapy_source_1.set_frequency(0, self.freq)
+        self.rtlsdr_source_0.set_center_freq(self.freq, 0)
 
     def get_frac_resampling(self):
         return self.frac_resampling
