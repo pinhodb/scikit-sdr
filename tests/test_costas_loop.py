@@ -27,7 +27,7 @@ def test_costas_loop():
     F0 = 2e3
 
     #tx_sig = 1500 * np.exp(1j * (2 * np.pi * F0 / Fs * n + np.pi / 3))
-    tx_sig = np.repeat(1500 * np.exp(1j * np.pi / 3), 1000)
+    tx_sig = np.repeat(1 * np.exp(1j * np.pi / 3), 1000)
 
     # Apply a delay offset
     #out_frame = vfd(tx_sig, 2)
