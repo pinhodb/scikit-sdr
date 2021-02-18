@@ -55,10 +55,7 @@ class FrequencySync:
         _log.debug('FSYNC init: phase_recovery_loop_bw=%f, phase_recovery_gain=%f, theta=%f, d=%f, p_gain=%f, i_gain=%f',
                    phase_recovery_loop_bw, phase_recovery_gain, theta, d, self.p_gain, self.i_gain)
 
-    def __call__(self, inp: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-        # Preallocate outputs
-        out = np.empty_like(inp)
-        phase_correction = np.empty_like(inp, dtype=float)
+    def __call__(self, inp: np.ndarray, out: np.ndarray, phase_estimate: np.ndarray = None) -> int:
 
         def common_logic():
             # Phase accumulate and correct
@@ -74,7 +71,8 @@ class FrequencySync:
             self._dds_prev_input = ph_err * self.p_gain + loopfilt_out
 
             self._phase = self.dds_gain * dds_out
-            phase_correction[idx] = self._phase
+            if phase_estimate is not None:
+                phase_estimate[idx] = -self._phase
             self._prev_sample = out[idx]
 
         if self.ped == 1: # BPSK
@@ -89,10 +87,7 @@ class FrequencySync:
                 ph_err = np.sign(self._prev_sample.real) * self._prev_sample.imag \
                          - np.sign(self._prev_sample.imag) * self._prev_sample.real
                 common_logic()
-
-        # Change sign to convert from correction to estimate
-        phase_estimate = -1 * phase_correction
-        return out, phase_estimate
+        return 0
 
     def __repr__(self):
         args = 'sps={}, mod={}, damp_factor={}, norm_loop_gain={}' \

@@ -134,6 +134,7 @@ class ControlLoop:
     def advance_loop(self, error: float):
         self.frequency = self.frequency + self.beta * error
         self.phase = self.phase + self.frequency + self.alpha * error
+        return self.frequency + self.alpha * error
 
     _tanh_lut_table = [
         -0.96402758, -0.96290241, -0.96174273, -0.96054753, -0.95931576, -0.95804636,

@@ -21,9 +21,8 @@
 import logging
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 _log.setLevel(logging.DEBUG)
@@ -47,7 +46,7 @@ class phase_offset_est(gr.sync_block):
         nsamples = len(out)
         for i in range(0, nsamples, self.frame_size):
             j = i + self.frame_size
-            out[i:j] = self.phase_off_est(in0[i:j])
+            self.phase_off_est(in0[i:j], out[i:j])
 
         _log.debug('nsamples: %d', nsamples)
         return nsamples

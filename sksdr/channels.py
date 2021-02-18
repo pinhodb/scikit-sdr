@@ -40,12 +40,13 @@ class AWGNChannel:
         """
         return 0.5 * np.log1p(self.snr) / np.log(2.0)
 
-    def __call__(self, inp: np.ndarray) -> np.ndarray:
+    def __call__(self, inp: np.ndarray, out: np.ndarray) -> int:
         """
         The main work function.
 
-        :param inp: Input samples
-        :return: Output samples
+        :param inp: Input signal
+        :param out: Output signal
+        :return: 0 if OK, error code otherwise
         """
         size = len(inp)
         if self.signal_power == 'measured':
@@ -56,10 +57,11 @@ class AWGNChannel:
         noise_power = signal_power / self._snr_linear
 
         if inp.dtype == np.complex:
-            noise = np.sqrt(noise_power / 2) * (np.random.normal(size=size) + 1j * np.random.normal(size=size))
+            # for some reason random.default_rng().normal() is much faster than random.normal()
+            out[:] = inp + np.sqrt(noise_power / 2) * (np.random.default_rng().normal(size=size) + 1j * np.random.default_rng().normal(size=size))
         else:
-            noise = np.sqrt(noise_power) * np.random.normal(size=size)
-        return inp + noise
+            out[:] = inp + np.sqrt(noise_power) * np.random.default_rng().normal(size=size)
+        return 0
 
     def __repr__(self) -> str:
         """

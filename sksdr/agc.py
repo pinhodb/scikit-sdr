@@ -63,15 +63,15 @@ class AGC:
         self._filter_state = np.zeros(self.avg_len - 1)
         self._gain = 0.0 # Np (neper)
 
-    def __call__(self, inp: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def __call__(self, inp: np.ndarray, out: np.ndarray, err: np.ndarray = None) -> int:
         """
         The main work function.
 
         :param inp: Input samples
-        :return: Output samples, error signal
+        :param out: Output samples
+        :param err: Error signal
+        :return: 0 if OK, or error code otherwise
         """
-        out = np.empty_like(inp)
-        err = np.empty_like(inp)
 
         inp_pow, self._filter_state = signal.lfilter(self._filter_coeffs, 1, abs(inp)**2, zi=self._filter_state)
         inp_pow_ln = np.log(inp_pow)
@@ -82,10 +82,12 @@ class AGC:
             # z = inp_pow[i] * exp(gain)^2
             # z_ln = ln(z) = inp_pow_ln[i] + ln(exp(gain)^2) = inp_pow_ln[i] + 2*gain
             z_ln = inp_pow_ln[i] + 2 * self._gain
-            err[i] = self._ref_power_ln - z_ln
-            self._gain = min(self._gain + self.det_gain * err[i], self._max_gain_ln)
-            # _log.debug('AGC loop: err=%f, gain=%f, out=%s', err[i], self._gain, out[i].__format__('.6f'))
-        return out, err
+            error = self._ref_power_ln - z_ln
+            if err is not None:
+                err[i] = error
+            self._gain = min(self._gain + self.det_gain * error, self._max_gain_ln)
+            # _log.debug('AGC loop: err=%f, gain=%f, out=%s', err, self._gain, out[i].__format__('.6f'))
+        return 0
 
     def __repr__(self):
         """

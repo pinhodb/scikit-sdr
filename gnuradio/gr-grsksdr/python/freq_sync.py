@@ -21,9 +21,8 @@
 import logging
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)
@@ -42,5 +41,5 @@ class freq_sync(gr.sync_block):
     def work(self, input_items, output_items):
         in0 = input_items[0]
         out = output_items[0]
-        out[:], _ = self.fsync(in0)
+        self.fsync(in0, out)
         return len(out)

@@ -21,9 +21,8 @@
 import logging
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)
@@ -47,7 +46,7 @@ class coarse_freq_comp(gr.sync_block):
         nsamples = len(out)
         for i in range(0, nsamples, self.frame_size):
             j = i + self.frame_size
-            out[i:j], _, _ = self.cfc(in0[i:j])
+            self.cfc(in0[i:j], out[i:j])
 
         _log.debug('len out: %d', nsamples)
         return nsamples

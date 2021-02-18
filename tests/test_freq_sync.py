@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 import sksdr
 
 _log = logging.getLogger(__name__)
@@ -417,5 +416,6 @@ def test_freq_sync():
         0.6873271170573665    +0.45795953427678815j    ,
         0.1712129956738913    +0.5958062402858753j     ])
 
-    out_frame, _ = fsync(in_frame)
+    out_frame = np.empty_like(in_frame)
+    fsync(in_frame, out_frame)
     assert np.allclose(out_frame, expected_frame)

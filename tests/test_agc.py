@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 import sksdr
 
 _log = logging.getLogger(__name__)
@@ -818,7 +817,9 @@ def test_agc():
         0.1546456844197974   +0.33190301852491677j   ])
 
     agc = sksdr.AGC(ref_power, max_gain, det_gain, avg_len)
-    out_frame, _ = agc(in_frame)
+    out_frame = np.empty_like(in_frame)
+    error_sig = np.empty_like(in_frame)
+    agc(in_frame, out_frame, error_sig)
 
     in_frame = np.array([
         0.004789022011574023  +0.5683155898772889j  ,
@@ -1624,7 +1625,9 @@ def test_agc():
        -0.04409396049477288   -0.06398258189153214j ,
         0.2021873782326143    +0.3467643492009155j  ])
 
-    out_frame, _ = agc(in_frame)
+    out_frame = np.empty_like(in_frame)
+    error_sig = np.empty_like(in_frame)
+    agc(in_frame, out_frame, error_sig)
 
     in_frame = np.array([
         0.22987589867911334  +0.7653355725356431j    ,
@@ -2430,6 +2433,9 @@ def test_agc():
         0.16957632851133242  -0.4265515232372606j   ,
        -0.11354294209449825  -0.5478672348964042j   ])
 
-    out_frame, _ = agc(in_frame)
+    out_frame = np.empty_like(in_frame)
+    error_sig = np.empty_like(in_frame)
+    agc(in_frame, out_frame, error_sig)
+
     # Only assert after a few frames, to make sure we're in steady-state.
     assert np.allclose(out_frame, expected_frame)

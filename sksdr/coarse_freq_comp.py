@@ -39,12 +39,15 @@ class CoarseFrequencyComp:
         self._sum_phase = 0.0
         self._prev_buf = np.zeros(self._fft_size, dtype=complex)
 
-    def __call__(self, inp: np.ndarray) -> Tuple[np.ndarray, np.ndarray, float]:
+    def __call__(self, inp: np.ndarray, out: np.ndarray, shifted_fft: np.ndarray = None, freq_offset: np.ndarray = None) -> int:
         """
         The main work function.
 
-        :param inp: Input samples
-        :return: Output samples, FFT of the input signal buffer, frequency offset
+        :param inp: Input signal
+        :param out: Output signal
+        :param shifted_fft: PSD of input signal
+        :param freq_offset: Frequency offset of input signal
+        :return: 0 if OK, error code otherwise
         """
         if len(inp) > self._fft_size:
             # TODO Implement average fft
@@ -52,22 +55,26 @@ class CoarseFrequencyComp:
 
         time_steps = np.arange(0, len(inp) + 1)
         raised = inp**self.mod_order
-        out = np.empty_like(inp)
         buf = np.hstack((self._prev_buf[len(raised):], raised))
         self._prev_buf = buf
 
         abs_fft = abs(fft(buf, self._fft_size))
         shift_fft = fftshift(abs_fft)
+        if shifted_fft is not None:
+            shifted_fft[:] = shift_fft
         max_idx = np.argmax(shift_fft)
         offset_idx = max_idx - self._fft_size / 2
         df = self.sample_rate / self._fft_size
-        freq_offset = df  * (offset_idx) / self.mod_order
-        phase = freq_offset * time_steps / self.sample_rate
+        freq_off  = df * (offset_idx) / self.mod_order
+        # FIXME unnecessary copy
+        if freq_offset is not None:
+            freq_offset[:] = freq_off
+        phase = freq_off * time_steps / self.sample_rate
 
         # Frequency correction
-        out = inp * np.exp(1j * 2 * np.pi * (self._sum_phase - phase[:-1]))
+        out[:] = inp * np.exp(1j * 2 * np.pi * (self._sum_phase - phase[:-1]))
         self._sum_phase -= phase[-1]
-        return out, shift_fft, freq_offset
+        return 0
 
     def __repr__(self):
         """

@@ -36,7 +36,9 @@ def test_costas_loop():
     # Apply a delay offset
     #out_frame = vfd(tx_sig, 2)
     out_sig = np.zeros_like(rx_sig)
-    costas(rx_sig, out_sig)
+    err_sig = np.zeros_like(rx_sig)
+    filter_out = np.zeros_like(rx_sig)
+    costas(rx_sig, out_sig, err_sig, filter_out)
 
     plt.plot(tx_sig.real)
     plt.plot(out_sig.real)

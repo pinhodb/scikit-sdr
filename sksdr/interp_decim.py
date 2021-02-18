@@ -22,16 +22,20 @@ class FirInterpolator:
         self.coeffs = coeffs
         self._filter_state = np.zeros(len(self.coeffs) - 1)
 
-    def __call__(self, inp: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def __call__(self, inp: np.ndarray, filtered: np.ndarray, upsampled: np.ndarray = None) -> int:
         """
         The main work function.
 
         :param inp: Input samples
-        :return: Upsampled samples, filtered samples
+        :param filtered: Filtered samples
+        :param upsampled: Upsampled samples
+        :return: 0 if OK, error code otherwise
         """
-        upsampled = upsample(inp, self.factor)
-        filtered, self._filter_state = signal.lfilter(self.coeffs, 1, upsampled, zi=self._filter_state)
-        return upsampled, filtered
+        if upsampled is None:
+            upsampled = np.empty(len(inp) * self.factor, dtype=complex)
+        upsample(inp, self.factor, upsampled)
+        filtered[:], self._filter_state = signal.lfilter(self.coeffs, 1, upsampled, zi=self._filter_state)
+        return 0
 
     def __repr__(self):
         """
@@ -55,16 +59,20 @@ class FirDecimator:
         self.coeffs = coeffs
         self._filter_state = np.zeros(len(self.coeffs) - 1)
 
-    def __call__(self, inp: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def __call__(self, inp: np.ndarray, downsampled: np.ndarray, filtered: np.ndarray = None) -> int:
         """
         The main work function.
 
         :param inp: Input samples
-        :return: Upsampled samples, filtered samples
+        :param downsampled: Upsampled samples
+        :param filtered: Filtered samples
+        :return: 0 if OK, error code otherwise
         """
-        filtered, self._filter_state = signal.lfilter(self.coeffs, 1, inp, zi=self._filter_state)
-        downsampled = downsample(filtered, self.factor)
-        return filtered, downsampled
+        if downsampled is None:
+            downsampled = np.empty(len(inp) // self.factor, dtype=complex)
+        filtered[:], self._filter_state = signal.lfilter(self.coeffs, 1, inp, zi=self._filter_state)
+        downsample(filtered, self.factor, downsampled)
+        return 0
 
     def __repr__(self):
         """
@@ -75,13 +83,11 @@ class FirDecimator:
         args = 'factor={}, coeffs={}'.format(self.factor, self.coeffs)
         return '{}({})'.format(self.__class__.__name__, args)
 
-def upsample(inp, factor: int):
-    out = np.empty(len(inp) * factor, dtype=complex)
+def upsample(inp: np.ndarray, factor: int, out: np.ndarray):
     out[::factor] = inp
     zero_array = np.zeros(len(inp), dtype=complex)
     for i in range(1, factor):
         out[i::factor] = zero_array
-    return out
 
-def downsample(inp, factor: int):
-    return inp[::factor]
+def downsample(inp: np.ndarray, factor: int, out: np.ndarray):
+    out[:] = inp[::factor]

@@ -12,15 +12,16 @@ class CostasLoop(ControlLoop):
         super().__init__(loop_bandwidth, 1.0, -1.0)
         #_log.debug('SSYNC init: theta=%f, d=%f, p_gain=%f, i_gain=%f', theta, d, self.p_gain, self.i_gain)
 
-    def __call__(self, inp: np.ndarray, out: np.ndarray) -> int:
+    def __call__(self, inp: np.ndarray, out: np.ndarray, error: np.ndarray, filter_out: np.ndarray) -> int:
 
         for i, _ in enumerate(out):
             nco_out = np.exp(-1j * self.phase)
             out[i] = inp[i] * nco_out
-            error = out[i].real * out[i].imag
-            self.advance_loop(error)
+            error[i] = out[i].real * out[i].imag
+            filter_out[i] = self.advance_loop(error[i])
             self.phase_wrap()
             self.frequency_limit()
+        return 0
 
     def __repr__(self):
         # args = 'mod={}, sps={}, damp_factor={}, norm_loop_gain={}, K={} A={}' \

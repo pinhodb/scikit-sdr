@@ -79,35 +79,35 @@ class PSKModulator:
         self._map = dict(zip([tuple(x2binlist(x, self.mod.bits_per_symbol)) for x in labels], self.constellation))
         self._inv_map = dict(zip(self._map.values(), self._map.keys()))
 
-    def modulate(self, bits: np.ndarray) -> np.ndarray:
+    def modulate(self, bits: np.ndarray, symbols: np.ndarray) -> int:
         """
         Modulates a stream of bits into symbols.
 
         :param bits: Input bits
-        :return: Output symbols
+        :param bits: Output symbols
+        :return: 0 if OK, error code otherwise
         """
         m = self.mod.bits_per_symbol
-        n_symbols = len(bits) // m
-        assert len(bits) == n_symbols * m
-        symbols = np.empty(n_symbols, dtype=complex)
+        n_symbols = len(symbols)
+        assert len(bits) == len(symbols) * m
         for i, bit_sequence in enumerate(np.reshape(bits, newshape=(n_symbols, m))):
             symbols[i] = self._map[tuple(bit_sequence)]
-        return symbols
+        return 0
 
-    def demodulate(self, symbols: np.ndarray) -> np.ndarray:
+    def demodulate(self, symbols: np.ndarray, bits: np.ndarray) -> int:
         """
         Demodulates a stream of symbols into bits.
 
-        :param bits: Input bits
-        :return: Output symbols
+        :param bits: Input symbols
+        :param symbols: Output bits
+        :return: 0 if OK, error code otherwise
         """
         bps = self.mod.bits_per_symbol
-        bits = np.empty(len(symbols) * bps, dtype=int)
         for i, s in enumerate(symbols):
             s_idx = np.argmin(np.abs(s - self.constellation))
             s_hat = self.constellation[s_idx]
             bits[i * bps : (i + 1) * bps] = self._inv_map[s_hat]
-        return bits
+        return 0
 
     def __repr__(self):
         """

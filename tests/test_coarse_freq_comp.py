@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 import sksdr
 
 _log = logging.getLogger(__name__)
@@ -416,5 +415,6 @@ def test_coarse_freq_comp():
         0.4470515304312367    +0.4294693178683514j     ])
 
     cfc = sksdr.CoarseFrequencyComp(mod.order, sample_rate, resolution)
-    out_frame, _, _ = cfc(in_frame)
+    out_frame = np.empty_like(in_frame)
+    cfc(in_frame, out_frame)
     assert np.allclose(out_frame, expected_frame)

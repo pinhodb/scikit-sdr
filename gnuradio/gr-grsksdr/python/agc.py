@@ -42,6 +42,6 @@ class agc(gr.sync_block):
     def work(self, input_items, output_items):
         in0 = input_items[0]
         out = output_items[0]
-        out[:], _ = self.agc(in0)
+        self.agc(in0, out)
         _log.log(DEBUG-1, out)
         return len(out)

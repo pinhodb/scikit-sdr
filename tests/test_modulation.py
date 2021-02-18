@@ -2,7 +2,6 @@ import logging
 import unittest
 
 import numpy as np
-
 import sksdr
 
 _log = logging.getLogger(__name__)
@@ -15,7 +14,9 @@ class TestPSKModulator(unittest.TestCase):
     def test_modulation(self):
         bits = np.array([0, 0, 0, 1, 1, 1, 1, 0])
         expected_symbols = 1 / np.sqrt(2) * np.array([1.0 + 1.0j, -1.0 + 1.0j, -1.0 - 1.0j, 1.0 - 1.0j])
-        symbols = self.psk.modulate(bits)
+        n_symbols = len(bits) // self.mod.bits_per_symbol
+        symbols = np.empty(n_symbols, dtype=complex)
+        self.psk.modulate(bits, symbols)
         err_msg = f'expected_symbols = {expected_symbols}\n'
         err_msg += f'symbols = {symbols}\n'
         self.assertTrue(np.allclose(symbols, expected_symbols), err_msg)
@@ -23,7 +24,8 @@ class TestPSKModulator(unittest.TestCase):
     def test_demodulation(self):
         symbols = 1 / np.sqrt(2) * np.array([1.0 + 1.0j, -1.0 + 1.0j, -1.0 - 1.0j, 1.0 - 1.0j])
         expected_bits = np.array([0, 0, 0, 1, 1, 1, 1, 0])
-        bits = self.psk.demodulate(symbols)
+        bits = np.empty(len(symbols) * self.mod.bits_per_symbol, dtype=int)
+        self.psk.demodulate(symbols, bits)
         err_msg = f'expected_bits = {expected_bits}\n'
         err_msg += f'bits = {bits}\n'
         self.assertTrue(np.alltrue(bits == expected_bits), err_msg)

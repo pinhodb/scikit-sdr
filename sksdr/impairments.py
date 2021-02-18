@@ -24,18 +24,19 @@ class PhaseFrequencyOffset:
         self.phase_offset = np.deg2rad(phase_offset)
         self._sum_phase = 0.0
 
-    def __call__(self, inp: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def __call__(self, inp: np.ndarray, out: np.ndarray) -> int:
         """
         The main work function.
 
         :param inp: Input samples
-        :return: Output samples, phase offset
+        :param out: Output samples
+        :return: 0 if OK, error code otherwise
         """
         time_steps = np.arange(0, len(inp) + 1)
         phase = self.freq_offset * time_steps / self.sample_rate
 
         # Apply frequency and phase offset
-        out = inp * np.exp(1j * 2 * np.pi * (self._sum_phase + phase[:-1] + self.phase_offset))
+        out[:] = inp * np.exp(1j * 2 * np.pi * (self._sum_phase + phase[:-1] + self.phase_offset))
         self._sum_phase += phase[-1]
         return out, phase
 
@@ -66,14 +67,15 @@ class VariableFractionalDelay:
         self.init_state = init_state
         self._buf = deque([self.init_state] * (self.max_delay + 1), maxlen=self.max_delay + 1)
 
-    def __call__(self, inp: np.ndarray, delay: float) -> np.ndarray:
+    def __call__(self, inp: np.ndarray, delay: float, out: np.ndarray) -> int:
         """
         The main work function.
 
         :param inp: Input samples
-        :return: Output samples
+        :param delay: The delay to apply
+        :param out: Output samples
+        :return: 0 if OK, error code otherwise
         """
-        out = np.empty_like(inp)
         int_part = int(np.floor(delay))
         frac_part = delay - int_part
         for i in range(len(inp)):
