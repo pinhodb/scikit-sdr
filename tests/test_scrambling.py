@@ -2,7 +2,6 @@ import logging
 import unittest
 
 import numpy as np
-
 import sksdr
 
 _log = logging.getLogger(__name__)
@@ -32,7 +31,8 @@ class TestScrambling(unittest.TestCase):
             1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1,
             1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1],
             dtype=np.uint8)
-        out_bits = scrambler(in_bits)
+        out_bits = np.empty_like(in_bits)
+        scrambler(in_bits, out_bits)
         assert np.all(out_bits == expected_bits)
 
     def test_descramble(self):
@@ -59,5 +59,6 @@ class TestScrambling(unittest.TestCase):
             1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1,
             1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0],
             dtype=np.uint8)
-        out_bits = descrambler(in_bits)
+        out_bits = np.empty_like(in_bits)
+        descrambler(in_bits, out_bits)
         assert np.all(out_bits == expected_bits)

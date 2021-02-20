@@ -63,15 +63,15 @@ class SymbolSync:
 
         _log.debug('SSYNC init: theta=%f, d=%f, p_gain=%f, i_gain=%f', theta, d, self.p_gain, self.i_gain)
 
-    def __call__(self, inp: np.ndarray, nout: Optional[int] = None) -> Tuple[np.ndarray, int, np.ndarray]:
-        _symbols = np.empty(int(len(inp) / self.sps * 1.1), dtype=complex)
-        _timing_err = np.empty_like(inp)
+    def __call__(self, inp: np.ndarray, out: np.ndarray, timing_err: np.ndarray = None) -> int:
+
         self._strobe_count = 0
 
         idx = 0
         for idx, i in enumerate(inp):
             # Interpolator
-            _timing_err[idx] = self.mu
+            if timing_err is not None:
+                timing_err[idx] = self.mu
 
             xseq = np.vstack((i, self._interp_states))
             int_v = self._coeffs.dot(xseq)
@@ -79,9 +79,8 @@ class SymbolSync:
             self._interp_states = xseq[:3]
 
             if self._strobe:
-                _symbols[self._strobe_count] = int_out
+                out[self._strobe_count] = int_out
                 self._strobe_count += 1
-
             # ZCTED
             # Calculate the midsample point for odd or even samples per symbol
             if self._strobe and not np.any(self._strobe_hist[1:]):
@@ -118,9 +117,9 @@ class SymbolSync:
 
             self._nco_count = (self._nco_count - W) % 1 # update counter
 
-            if self._strobe_count == nout:
+            if self._strobe_count == len(out):
                 break
-        return _symbols[:self._strobe_count], idx + 1, _timing_err
+        return 0
 
     def __repr__(self):
         args = 'mod={}, sps={}, damp_factor={}, norm_loop_gain={}, K={} A={}' \

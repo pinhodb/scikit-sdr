@@ -11,17 +11,16 @@ class Scrambler:
         self.init_state = init_state
         self._state = deque(self.init_state, maxlen=4)
 
-    def __call__(self, data: np.ndarray) -> np.ndarray:
-        y = np.empty_like(data)
+    def __call__(self, data: np.ndarray, data_out: np.ndarray) -> int:
         for i, b in enumerate(data):
             for j in range(1, len(self.poly)):
                 if self.poly[j]:
                     b ^= self._state[j-1]
                     # to work with modulo-N, use this instead of XOR
                     #b = (b + data) % N
-            y[i] = b
+            data_out[i] = b
             self._state.appendleft(b)
-        return y
+        return 0
 
     def __repr__(self):
         args = 'poly={}, init_state={}'.format(self.poly, self.init_state)
@@ -34,17 +33,16 @@ class Descrambler:
         self.init_state = init_state
         self._state = deque(self.init_state, maxlen=4)
 
-    def __call__(self, data: np.ndarray) -> np.ndarray:
-        y = np.empty_like(data)
+    def __call__(self, data: np.ndarray, data_out: np.ndarray) -> int:
         for i, b in enumerate(data):
             for j in range(1, len(self.poly)):
                 if self.poly[j]:
                     b ^= self._state[j-1]
                     # to work with modulo-N, use this instead of XOR
                     #b = (b + data) % N
-            y[i] = b
+            data_out[i] = b
             self._state.appendleft(data[i])
-        return y
+        return 0
 
     def __repr__(self):
         args = 'poly={}, init_state={}'.format(self.poly, self.init_state)

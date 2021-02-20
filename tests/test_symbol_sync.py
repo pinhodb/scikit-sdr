@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 import sksdr
 
 _log = logging.getLogger(__name__)
@@ -319,5 +318,8 @@ def test_symbol_sync():
        -0.07270280692867603   +0.07124285584203287j   ])
 
     sym_sync = sksdr.SymbolSync(mod, sps, damp_factor, norm_loop_bw, K, A)
-    out_frame, _, _ = sym_sync(in_frame)
+    out_frame = np.empty(int(len(in_frame) / sps * 1.1), dtype=complex)
+    timing_err = np.empty_like(in_frame)
+
+    sym_sync(in_frame, out_frame, timing_err)
     assert np.allclose(out_frame, expected_frame)

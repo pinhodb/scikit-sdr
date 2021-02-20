@@ -22,9 +22,8 @@ import logging
 from logging import DEBUG
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)
@@ -62,7 +61,7 @@ class frame_sync(gr.basic_block):
         nret = 0
         nin = int(nin0 / self.frame_size) * self.frame_size
         for i in range(0, nin, self.frame_size):
-            ret, _, valid = self.frame_sync(in0[i : i + self.frame_size])
+            valid = self.frame_sync(in0[i : i + self.frame_size], out0[nret : nret + self.frame_size])
             if valid:
                 # data = dict()
 
@@ -88,9 +87,7 @@ class frame_sync(gr.basic_block):
                 # data['rx_msg'] = grsksdr.binlist2x(data['payload'][:15 * 8], 8)
                 # data['rx_msg_ascii'] = [chr(x) for x in data['rx_msg']]
                 # _log.debug(data['rx_msg_ascii'])
-
-                out0[nret : nret + len(ret)] = ret
-                nret += len(ret)
+                nret += self.frame_size
                 if nret == nout0:
                     break
 

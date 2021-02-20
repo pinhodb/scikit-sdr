@@ -22,9 +22,8 @@ import logging
 from logging import DEBUG
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)
@@ -49,11 +48,7 @@ class symbol_sync(gr.basic_block):
     def general_work(self, input_items, output_items):
         in0 = input_items[0]
         out = output_items[0]
-        nout = len(out)
-        ret, ninp, _ = self.ssync(in0, nout)
-        nret = len(ret)
-        _log.debug('len in0/out0/inp/ret: %d/%d/%d/%d', len(in0), nout, ninp, nret)
-        _log.log(DEBUG-1, ret)
-        out[:nret] = ret
+        ninp = self.ssync(in0, out)
+        _log.debug('len in0/out0/inp: %d/%d/%d/%d', len(in0), len(out), ninp)
         self.consume(0, ninp)
-        return nret
+        return len(out)

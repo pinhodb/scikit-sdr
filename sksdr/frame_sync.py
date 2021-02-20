@@ -15,7 +15,7 @@ class FrameSync:
         self._buf = np.empty(0)
         self._xcorr = np.empty(0)
 
-    def __call__(self, inp: np.ndarray) -> Tuple[np.ndarray, np.ndarray, bool]:
+    def __call__(self, inp: np.ndarray, out: np.ndarray) -> int:
 
         # Correlate with preamble
         xcorr, self._filter_state = signal.lfilter(self.preamble, 1, inp, zi=self._filter_state)
@@ -40,22 +40,22 @@ class FrameSync:
         frame_end = frame_start + self.frame_size
 
         if frame_start < 0:
-            ret = None
+            out = None
             self._buf = self._buf[best_idx + 1:]
             self._xcorr = self._xcorr[best_idx + 1:]
             valid = False
         elif frame_end > len(self._buf):
-            ret = None
+            out = None
             self._buf = self._buf[frame_start:]
             self._xcorr = self._xcorr[frame_start:]
             valid = False
         else:
-            ret = self._buf[frame_start:frame_end]
+            out = self._buf[frame_start:frame_end]
             self._buf = self._buf[frame_end:]
             self._xcorr = self._xcorr[frame_end:]
             valid = True
 
-        return ret, idxs, valid
+        return valid
 
     def __repr__(self):
         args = 'preamble={}, threshold={}, frame_size={}'.format(self.preamble, self.threshold, self.frame_size)

@@ -21,9 +21,8 @@
 import logging
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)
@@ -43,6 +42,6 @@ class descrambler(gr.sync_block):
         in0 = input_items[0]
         out = output_items[0]
         nsamples = len(out)
-        out[:] = self.descrambler(in0)
+        self.descrambler(in0, out)
         _log.debug('nsamples: %d', nsamples)
         return nsamples

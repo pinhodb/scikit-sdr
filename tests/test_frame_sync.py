@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 import sksdr
 
 _log = logging.getLogger(__name__)
@@ -9,9 +8,12 @@ _log = logging.getLogger(__name__)
 def test_frame_sync():
     threshold = 8.0
     frame_size = 100
-    psk = sksdr.PSKModulator(sksdr.QPSK, [0, 1, 3, 2], phase_offset=np.pi/4)
+    mod = sksdr.QPSK
+    psk = sksdr.PSKModulator(mod, [0, 1, 3, 2], phase_offset=np.pi/4)
     preamble = np.repeat(sksdr.UNIPOLAR_BARKER_SEQ[13], 2)
-    modulated_preamble = psk.modulate(preamble)
+    n_symbols = len(preamble) // mod.bits_per_symbol
+    modulated_preamble = np.empty(n_symbols, dtype=complex)
+    psk.modulate(preamble, modulated_preamble)
     frame_sync = sksdr.FrameSync(modulated_preamble, threshold, frame_size)
 
     # This physical frame contains the preamble but not a full logical frame
@@ -118,7 +120,8 @@ def test_frame_sync():
        -0.07270280692867603   +0.07124285584203287j   ])
 
     # out_frame is None, since the frame is still incomplete
-    out_frame, _, _ = frame_sync(in_frame)
+    out_frame = np.empty(frame_size)
+    frame_sync(in_frame, out_frame)
 
     # This physical frame contains the rest of the 1st logical frame and a the
     # beginning of the 2nd logical frame
@@ -326,5 +329,6 @@ def test_frame_sync():
         0.12407651502056877  +0.5625172473669444j  ,
        -0.6142909156079297   +0.7773840695944384j  ])
 
-    out_frame, _, _ = frame_sync(in_frame)
+    out_frame = np.empty(frame_size)
+    frame_sync(in_frame, out_frame)
     assert np.allclose(out_frame, expected_frame)

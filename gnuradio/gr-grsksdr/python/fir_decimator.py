@@ -44,5 +44,5 @@ class fir_decimator(gr.decim_block):
     def work(self, input_items, output_items):
         in0 = input_items[0]
         out = output_items[0]
-        _, out[:] = self.decim(in0)
+        self.decim(in0, out)
         return len(out)
