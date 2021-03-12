@@ -56,6 +56,9 @@ autodoc_member_order = 'bysource'
 autodoc_default_flags = ['members', 'show-inheritance']
 autodoc_inherit_docstrings = True # If no class summary, inherit base class summary
 autoclass_content = "both" # Add __init__ doc (ie. params) to class summaries
+
+bibtex_bibfiles = ["refs.bib"]
+
 add_module_names = False
 html_show_sourcelink = False # Remove 'view source code' from top of page (for html, not python)
 

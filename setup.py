@@ -7,7 +7,7 @@ with open('README.md', 'r') as fh:
 if __name__ == '__main__':
     setup(
         name='scikit-sdr',
-        version='0.3.dev0',
+        version='0.3.dev1',
         description='Python 3 library that provides algorithms for building digital communication systems and for experimenting with DSP and SDR',
         long_description=long_description,
         long_description_content_type='text/markdown',

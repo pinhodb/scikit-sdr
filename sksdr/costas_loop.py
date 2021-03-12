@@ -3,11 +3,11 @@ from typing import Optional, Tuple
 
 import numpy as np
 
-from .control_loop import ControlLoop
+from .control_loop import PLL
 
 _log = logging.getLogger(__name__)
 
-class CostasLoop(ControlLoop):
+class CostasLoop(PLL):
     def __init__(self, loop_bandwidth: float):
         super().__init__(loop_bandwidth, 1.0, -1.0)
         #_log.debug('SSYNC init: theta=%f, d=%f, p_gain=%f, i_gain=%f', theta, d, self.p_gain, self.i_gain)

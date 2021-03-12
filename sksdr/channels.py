@@ -12,10 +12,10 @@ class AWGNChannel:
     """
     Additive white gaussian noise (AWGN) channel model.
     """
-    def __init__(self, snr: float = np.inf, signal_power: Union[int, str] = 'measured'):
+    def __init__(self, snr: float = np.inf, signal_power: int = None):
         """
         :param snr: Desired SNR (dB)
-        :param signal_power: Desired signal power (linear units), or a string if the signal is to be measured on each :meth:`__call__()`.
+        :param signal_power: Desired signal power (linear units), or None if the signal is to be measured on each :meth:`__call__()`.
         """
         self.snr = snr
         self.signal_power = signal_power
@@ -34,7 +34,7 @@ class AWGNChannel:
 
     def capacity(self):
         r"""
-        Returns the capacity of the channel.
+        The capacity of the channel.
 
         The capacity is computed using the Shannon–Hartley formula: :math:`C = B\log_{2}\left(1+\frac{P}{N_0 B}\right)`
         """
@@ -49,7 +49,8 @@ class AWGNChannel:
         :return: 0 if OK, error code otherwise
         """
         size = len(inp)
-        if self.signal_power == 'measured':
+        if self.signal_power is None:
+            # Measured
             signal_power = np.linalg.norm(inp)**2 / size
         else:
             signal_power = self.signal_power
@@ -67,7 +68,7 @@ class AWGNChannel:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
         args = 'snr={}, signal_power={}'.format(self.snr, self.signal_power)
         return '{}({})'.format(self.__class__.__name__, args)

@@ -11,7 +11,7 @@ _log = logging.getLogger(__name__)
 
 class CoarseFrequencyComp:
     r"""
-    Open loop frequency correction to a PSK input signal.
+    Open loop frequency correction on a PSK input signal.
 
     The algorithm estimates the frequency error :math:`\Delta\hat{f}` by using a periodogram of the :math:`m`\ :sup:`th`\  power of the received signal (the :math:`m`\ :sup:`th`\  power is used since it removes the :math:`m`\ :sup:`th`\  order PSK modulation, leaving only the carrier at a frequency :math:`m` times its original frequency):
 
@@ -32,12 +32,12 @@ class CoarseFrequencyComp:
         :param sample_rate: Input signal sampling rate (Hz)
         :param freq_res: Desired frequency resolution (Hz)
         """
-        self.mod_order = mod_order
-        self.sample_rate = sample_rate
-        self.freq_res = freq_res
-        self._fft_size = int(2**np.ceil(np.log2(self.sample_rate / self.freq_res)))
+        self._mod_order = mod_order
+        self._sample_rate = sample_rate
+        self._freq_res = freq_res
+        self._fft_size = int(2**np.ceil(np.log2(self._sample_rate / self._freq_res)))
+        self._buf = np.zeros(self._fft_size, dtype=complex)
         self._sum_phase = 0.0
-        self._prev_buf = np.zeros(self._fft_size, dtype=complex)
 
     def __call__(self, inp: np.ndarray, out: np.ndarray, shifted_fft: np.ndarray = None, freq_offset: np.ndarray = None) -> int:
         """
@@ -54,9 +54,9 @@ class CoarseFrequencyComp:
             raise NotImplementedError('Average FFT not implemented')
 
         time_steps = np.arange(0, len(inp) + 1)
-        raised = inp**self.mod_order
-        buf = np.hstack((self._prev_buf[len(raised):], raised))
-        self._prev_buf = buf
+        raised = inp**self._mod_order
+        buf = np.hstack((self._buf[len(raised):], raised))
+        self._buf = buf
 
         abs_fft = abs(fft(buf, self._fft_size))
         shift_fft = fftshift(abs_fft)
@@ -64,12 +64,12 @@ class CoarseFrequencyComp:
             shifted_fft[:] = shift_fft
         max_idx = np.argmax(shift_fft)
         offset_idx = max_idx - self._fft_size / 2
-        df = self.sample_rate / self._fft_size
-        freq_off  = df * (offset_idx) / self.mod_order
+        df = self._sample_rate / self._fft_size
+        freq_off  = df * (offset_idx) / self._mod_order
         # FIXME unnecessary copy
         if freq_offset is not None:
             freq_offset[:] = freq_off
-        phase = freq_off * time_steps / self.sample_rate
+        phase = freq_off * time_steps / self._sample_rate
 
         # Frequency correction
         out[:] = inp * np.exp(1j * 2 * np.pi * (self._sum_phase - phase[:-1]))
@@ -80,7 +80,7 @@ class CoarseFrequencyComp:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
-        args = 'mod_order={}, sample_rate={}, freq_res={}'.format(self.mod_order, self.sample_rate, self.freq_res)
+        args = 'mod_order={}, sample_rate={}, freq_res={}'.format(self._mod_order, self._sample_rate, self._freq_res)
         return '{}({})'.format(self.__class__.__name__, args)

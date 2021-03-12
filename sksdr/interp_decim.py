@@ -41,7 +41,7 @@ class FirInterpolator:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
         args = 'factor={}, coeffs={}'.format(self.factor, self.coeffs)
         return '{}({})'.format(self.__class__.__name__, args)
@@ -68,8 +68,8 @@ class FirDecimator:
         :param filtered: Filtered samples
         :return: 0 if OK, error code otherwise
         """
-        if downsampled is None:
-            downsampled = np.empty(len(inp) // self.factor, dtype=complex)
+        if filtered is None:
+            filtered = np.empty(len(inp), dtype=complex)
         filtered[:], self._filter_state = signal.lfilter(self.coeffs, 1, inp, zi=self._filter_state)
         downsample(filtered, self.factor, downsampled)
         return 0
@@ -78,7 +78,7 @@ class FirDecimator:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
         args = 'factor={}, coeffs={}'.format(self.factor, self.coeffs)
         return '{}({})'.format(self.__class__.__name__, args)

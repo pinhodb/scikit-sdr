@@ -14,7 +14,7 @@ def test_frame_sync():
     n_symbols = len(preamble) // mod.bits_per_symbol
     modulated_preamble = np.empty(n_symbols, dtype=complex)
     psk.modulate(preamble, modulated_preamble)
-    frame_sync = sksdr.FrameSync(modulated_preamble, threshold, frame_size)
+    frame_sync = sksdr.PreambleSync(modulated_preamble, threshold, frame_size)
 
     # This physical frame contains the preamble but not a full logical frame
     in_frame = np.array([
@@ -120,7 +120,7 @@ def test_frame_sync():
        -0.07270280692867603   +0.07124285584203287j   ])
 
     # out_frame is None, since the frame is still incomplete
-    out_frame = np.empty(frame_size)
+    out_frame = np.empty(frame_size, dtype=complex)
     frame_sync(in_frame, out_frame)
 
     # This physical frame contains the rest of the 1st logical frame and a the
@@ -329,6 +329,6 @@ def test_frame_sync():
         0.12407651502056877  +0.5625172473669444j  ,
        -0.6142909156079297   +0.7773840695944384j  ])
 
-    out_frame = np.empty(frame_size)
+    out_frame = np.empty(frame_size, dtype=complex)
     frame_sync(in_frame, out_frame)
     assert np.allclose(out_frame, expected_frame)

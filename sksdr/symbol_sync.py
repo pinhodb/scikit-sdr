@@ -117,9 +117,7 @@ class SymbolSync:
 
             self._nco_count = (self._nco_count - W) % 1 # update counter
 
-            if self._strobe_count == len(out):
-                break
-        return 0
+        return self._strobe_count
 
     def __repr__(self):
         args = 'mod={}, sps={}, damp_factor={}, norm_loop_gain={}, K={} A={}' \
