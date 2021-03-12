@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-
 import sksdr
 
 _log = logging.getLogger(__name__)
@@ -24,7 +23,8 @@ def test_hamming_7_4():
         0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0,
         1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1])
     fec = sksdr.Hamming(7, 4)
-    out_bits = fec.encode(in_bits)
+    out_bits = np.empty(int(len(in_bits) * 7 / 4), dtype=int)
+    fec.encode(in_bits, out_bits)
     assert np.all(out_bits == expected_bits)
 
 def test_desc_hamming_7_4():
@@ -47,5 +47,7 @@ def test_desc_hamming_7_4():
     in_bits[3] ^= 1
     in_bits[10] ^= 1
     fec = sksdr.Hamming(7, 4)
-    out_bits, flipped = fec.decode(in_bits)
-    assert np.all(out_bits == expected_bits) and np.all(flipped[[3, 10]] == 1)
+    out_bits = np.empty(int(len(in_bits) * 4 / 7), dtype=int)
+    flipped_bits = np.zeros(int(len(in_bits) * 4 / 7), dtype=int)
+    fec.decode(in_bits, out_bits, flipped_bits)
+    assert np.all(out_bits == expected_bits) and np.all(flipped_bits[[3, 10]] == 1)

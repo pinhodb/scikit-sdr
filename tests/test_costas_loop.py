@@ -15,14 +15,18 @@ def test_costas_loop():
     vfd = sksdr.VariableFractionalDelay(max_delay=5)
 
     # Generate random data symbols and apply BPSK modulation
+    mod = sksdr.BPSK
     ints = np.random.randint(0, 2, 1000)
     bits = sksdr.x2binlist(ints, 1)
-    psk = sksdr.PSKModulator(sksdr.BPSK, [0, 1], 1.0)
-    mod_sig = psk.modulate(bits)
+    psk = sksdr.PSKModulator(mod, [0, 1], 1.0)
+    n_symbols = len(bits) // mod.bits_per_symbol
+    mod_sig = np.empty(n_symbols, dtype=complex)
+    psk.modulate(bits, mod_sig)
 
     # Interpolate by 4 and filter with RRC tx filter
     interp = sksdr.FirInterpolator(4, sksdr.rrc(4, 0.5, 10))
-    _, tx_sig = interp(mod_sig)
+    tx_sig = np.empty(len(mod_sig) * 4, dtype=complex)
+    interp(mod_sig, tx_sig)
 
     n = np.arange(0, 4000)
     Fs = 8e3

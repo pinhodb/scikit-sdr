@@ -30,12 +30,16 @@ def test_fractional_delay1():
     # Generate random data symbols and apply QPSK modulation
     ints = np.random.randint(0, 4, 10000)
     bits = sksdr.x2binlist(ints, 2)
-    psk = sksdr.PSKModulator(sksdr.QPSK, [0, 1, 3, 2], 1.0, np.pi/4)
-    mod_sig = psk.modulate(bits)
+    mod = sksdr.QPSK
+    psk = sksdr.PSKModulator(mod, [0, 1, 3, 2], 1.0, np.pi/4)
+    n_symbols = len(bits) // mod.bits_per_symbol
+    mod_sig = np.empty(n_symbols, dtype=complex)
+    psk.modulate(bits, mod_sig)
 
     # Interpolate by 4 and filter with RRC tx filter
     interp = sksdr.FirInterpolator(4, sksdr.rrc(4, 0.5, 10))
-    _, tx_sig = interp(mod_sig)
+    tx_sig = np.empty(len(mod_sig) * 4, dtype=complex)
+    interp(mod_sig, tx_sig)
 
     # Apply the delay offset. Then, pass the offset signal through an AWGN channel.
     out_sig = np.empty_like(tx_sig)

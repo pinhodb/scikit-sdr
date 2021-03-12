@@ -6,7 +6,7 @@ import numpy as np
 from .agc import AGC
 from .channels import AWGNChannel
 from .coarse_freq_comp import CoarseFrequencyComp
-from .frame_sync import FrameSync
+from .frame_sync import PreambleSync
 from .freq_sync import FrequencySync
 from .impairments import PhaseFrequencyOffset, VariableFractionalDelay
 from .interp_decim import FirDecimator, FirInterpolator
@@ -39,7 +39,7 @@ class PSKTrans:
                  # Frame synchronization
                  prb_det_thr=8.0,
                  # Channel settings
-                 chan_snr=np.inf, chan_signal_power='measured',
+                 chan_snr=np.inf, chan_signal_power=None,
                  chan_delay_type='triangle', chan_delay_step=0.0, chan_max_delay=0.0,
                  chan_freq_offset=0.0, chan_phase_offset=0.0):
 
@@ -106,7 +106,7 @@ class PSKTrans:
         self.prb_det_thr = prb_det_thr
         self._preamble = np.repeat(UNIPOLAR_BARKER_SEQ[13], 2)
         self._mod_preamble = self._psk.modulate(self._preamble)
-        self._frame_sync = FrameSync(self._mod_preamble, self.prb_det_thr, self.frame_size_symbols)
+        self._frame_sync = PreambleSync(self._mod_preamble, self.prb_det_thr, self.frame_size_symbols)
 
         # Phase offset estimator
         self._phase_off_est = PhaseOffsetEst(self._mod_preamble)

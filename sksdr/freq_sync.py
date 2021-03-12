@@ -1,3 +1,6 @@
+"""
+Phase/Frequency synchronization algorithms.
+"""
 import logging
 from typing import Tuple
 
@@ -7,7 +10,23 @@ from .modulation import BPSK, QPSK, Modulation
 
 _log = logging.getLogger(__name__)
 
-class FrequencySync:
+class PSKSync:
+    """
+    Compensates for carrier frequency and phase offsets in signals in BPSK and QPSK.
+
+    The algorithm is a closed loop synchronizer that uses the discrete phase-locked loop (PLL) based algorithm described in :cite:`rice08`.
+    The maximum likelihood (ML) phase error detector (PED) is chosen, which consists of minimizing the energy in :math:`\theta_e` . It also has the advantage of avoiding arctangent operations required by other phase detectors based on a purely geometric The ML phase detector first de-rotates the input signal by the estimated phase from the DDS output (CCW rotation block). This leaves only the phase of the received data symbol :math:`\theta_r = \theta-\hat\theta`. It then subtracts the phase of the transmitted data symbol to obtain the phase error, :math:`\theta_e=\theta_r-\theta_d` . This is usually used in a data-aided system, in which there is a training sequence where the transmission symbols are well known. If the symbols are unknown then it is called a decision-directed system and the transmitted symbols must be estimated.
+
+    Kp is the slope of phase detector S-Curve in the linear range
+    BPSK: Kp = K * A^2
+    QPSK: Kp = 2 * K * A^2
+    K = Amplitude of received signal (unit gain from AGC)
+    A = Norm of constellation point
+    K1 (loop filter proportional gain)
+    K2 (loop filter integral gain)
+    # Loop bandwidth normalized by sample rate
+    phase_recovery_loop_bw = self.norm_loop_bw * self.sps
+    """
     def __init__(self, mod: Modulation, sps: int, damp_factor: float, norm_loop_bw: float):
         self.sps = sps
         self.mod = mod
@@ -30,6 +49,7 @@ class FrequencySync:
         # QPSK: Kp = 2 * K * A^2
         # K = Amplitude of received signal (unit gain from AGC)
         # A = Norm of constellation point
+        # K0 (phase detector gain)
         if self.mod == BPSK:
             self.ped = 1
             self.ped_gain = 1 # Kp

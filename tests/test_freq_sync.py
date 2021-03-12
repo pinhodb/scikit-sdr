@@ -10,7 +10,7 @@ def test_freq_sync():
     sps = 2
     damp_factor = 1.0
     norm_loop_bw = 0.01
-    fsync = sksdr.FrequencySync(mod, sps, damp_factor, norm_loop_bw)
+    fsync = sksdr.PSKSync(mod, sps, damp_factor, norm_loop_bw)
 
     in_frame = np.array([
        -0.00001940952177043791-0.000015698909952685536j,

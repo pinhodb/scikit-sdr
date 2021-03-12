@@ -37,7 +37,7 @@ class Modulation:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
         args = 'name={}, order={}, bits_per_symbol={}'.format(self.name, self.order, self.bits_per_symbol)
         return '{}({})'.format(self.__class__.__name__, args)
@@ -113,7 +113,7 @@ class PSKModulator:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
         args = 'mod={}, labels={}, constellation={}'.format(self.mod, self.labels, self.constellation)
         return '{}({})'.format(self.__class__.__name__, args)

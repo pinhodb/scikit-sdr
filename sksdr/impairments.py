@@ -44,7 +44,7 @@ class PhaseFrequencyOffset:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
         args = 'sample_rate={}, freq_offset={}, phase_offset={}'.format(self.sample_rate, self.freq_offset,
                                                                         self.phase_offset)
@@ -89,7 +89,7 @@ class VariableFractionalDelay:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
         args = 'max_delay={}, init_state={}'.format(self.max_delay, self.init_state)
         return '{}({})'.format(self.__class__.__name__, args)

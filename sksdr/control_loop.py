@@ -1,3 +1,6 @@
+"""
+Control loop algorithms.
+"""
 import logging
 from typing import Optional, Tuple
 
@@ -5,8 +8,23 @@ import numpy as np
 
 _log = logging.getLogger(__name__)
 
-class ControlLoop:
+class PLL:
+    """
+    Generic Phase-locked Loop structure.
+
+    Implements a 2nd-order generic PLL algorithm as described in :cite:`rice08`. The PLL consists of three basic components: the phase detector, the loop filter and the numerically-controlled oscillator (NCO). This class implements a  proportional-plus-integrator loop filter and a NCO implemented as an integrator. The phase detector is implementation-specific and so the typical usage pattern is to create an application-specific class (e.g., :ref:`CostasLoop`) that uses/extends this class and implements it's own phase-detector.
+
+    Two parameters are usually used to characterize a 2nd-order loop. The *damping factor* denoted by :math:`\zeta` and *natural frequency* denoted by :math:`\omega_n`. These parameters are given by:
+
+    .. math::
+        \zeta & =\frac{k_1}{2}\sqrt{\frac{k_0 k_p}{k_2}}
+        \omega_n & = \sqrt{k_0 k_p k_2}
+
+    where :math:`k0` is the NCO gain, :math:`kp is the phase detector gain, k1 is the loop filter proportional gain and k2 is the loop filter integrator gain`.
+    """
     def __init__(self, loop_bandwidth: float, max_freq: float, min_freq: float):
+        """
+        """
         self._phase = 0
         self._frequency = 0
 
@@ -19,8 +37,6 @@ class ControlLoop:
 
         # Set the bandwidth, which will then call update_gains()
         self.loop_bandwidth = loop_bandwidth
-
-        #_log.debug('SSYNC init: theta=%f, d=%f, p_gain=%f, i_gain=%f', theta, d, self.p_gain, self.i_gain)
 
     @property
     def min_freq(self):

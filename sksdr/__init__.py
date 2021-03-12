@@ -15,7 +15,7 @@ from .interp_decim import *
 from .modulation import *
 from .phase_offset_est import *
 from .plotting import *
-from .psk_trans import *
+#from .psk_trans import *
 from .pulses import *
 from .scrambling import *
 from .sequences import *

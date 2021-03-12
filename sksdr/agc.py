@@ -2,7 +2,6 @@
 Automatic gain control (AGC) algorithms.
 """
 import logging
-from typing import Tuple
 
 import numpy as np
 import scipy.signal as signal
@@ -10,7 +9,7 @@ import scipy.signal as signal
 _log = logging.getLogger(__name__)
 
 class AGC:
-    """
+    r"""
     AGC based on a logarithmic scheme.
 
     The algorithm doesn't use a linear loop scheme since that has a significant drawback: The time constant of the loop is input signal level dependent, and is different depending on whether the input signal is increasing or decreasing. These properties drastically reduce the control over the system's time constant. To solve this problem, a logarithmic loop is adopted. This allows complete control of the AGC's time constant, increases its dynamic range and generally provides good performance for a variety of signal types. For the logarithmic AGC scheme, the feedback loop's time constant is dependent solely on :attr:`det_gain` and independent of the input signal level.
@@ -30,7 +29,7 @@ class AGC:
     * :math:`A` is the reference value, given by :attr:`ref_power`,
     * :math:`K` is the detector gain, given by :attr:`det_gain`
 
-    The detector function :math:`D(\ldots)`, as mentioned, is implemented as a moving average filter:
+    The detector function :math:`D(\ldots)` is implemented as a moving average filter:
 
     TODO equation
 
@@ -53,15 +52,39 @@ class AGC:
         :param avg_len: Length of moving average filter (samples)
         """
         self.ref_power = ref_power
-        self._ref_power_ln = np.log(self.ref_power)
         self.max_gain = max_gain
-        self._max_gain_ln = np.log(10**(self.max_gain / 20)) # Np (neper)
         self.det_gain = det_gain
-        self.avg_len = avg_len
+        self._avg_len = avg_len
         # Moving average filter
-        self._filter_coeffs = np.ones(self.avg_len) / self.avg_len
-        self._filter_state = np.zeros(self.avg_len - 1)
+        self._filter_coeffs = np.ones(self._avg_len) / self._avg_len
+        self._filter_state = np.zeros(self._avg_len - 1)
         self._gain = 0.0 # Np (neper)
+
+    @property
+    def det_gain(self):
+        return self._det_gain
+
+    @det_gain.setter
+    def det_gain(self, value: int):
+        self._det_gain = value
+
+    @property
+    def max_gain(self):
+        return self._max_gain
+
+    @max_gain.setter
+    def max_gain(self, value: int):
+        self._max_gain = value
+        self._max_gain_ln = np.log(10**(self.max_gain / 20)) # Np (neper)
+
+    @property
+    def ref_power(self):
+        return self._ref_power
+
+    @ref_power.setter
+    def ref_power(self, value: int):
+        self._ref_power = value
+        self._ref_power_ln = np.log(self.ref_power)
 
     def __call__(self, inp: np.ndarray, out: np.ndarray, err: np.ndarray = None) -> int:
         """
@@ -72,7 +95,6 @@ class AGC:
         :param err: Error signal
         :return: 0 if OK, or error code otherwise
         """
-
         inp_pow, self._filter_state = signal.lfilter(self._filter_coeffs, 1, abs(inp)**2, zi=self._filter_state)
         inp_pow_ln = np.log(inp_pow)
 
@@ -93,8 +115,8 @@ class AGC:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and it's properties.
+        :return: A string representing the object and its properties.
         """
         args = 'ref_power={}, max_gain={}, det_gain={}, avg_len={}'.format(self.ref_power, self.max_gain,
-                                                                           self.det_gain, self.avg_len)
+                                                                           self.det_gain, self._avg_len)
         return '{}({})'.format(self.__class__.__name__, args)
