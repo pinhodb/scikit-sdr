@@ -42,13 +42,14 @@ class symbol_sync(gr.basic_block):
 
     def forecast(self, noutput_items, ninput_items_required):
         # setup size of input_items[i] for work call
-        for i in range(len(ninput_items_required)):
-            ninput_items_required[i] = int(np.ceil(noutput_items * self.sps))
+        #for i in range(len(ninput_items_required)):
+            #ninput_items_required[i] = int(np.ceil(noutput_items * self.sps))
+        pass
 
     def general_work(self, input_items, output_items):
         in0 = input_items[0]
         out = output_items[0]
-        ninp = self.ssync(in0, out)
-        _log.debug('len in0/out0/inp: %d/%d/%d/%d', len(in0), len(out), ninp)
-        self.consume(0, ninp)
-        return len(out)
+        nret = self.ssync(in0, out)
+        _log.debug('len in0/out0/nret: %d/%d/%d', len(in0), len(out), nret)
+        self.consume(0, len(in0))
+        return nret

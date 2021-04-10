@@ -7,7 +7,7 @@ from .agc import AGC
 from .channels import AWGNChannel
 from .coarse_freq_comp import CoarseFrequencyComp
 from .frame_sync import PreambleSync
-from .freq_sync import FrequencySync
+from .freq_sync import PSKSync
 from .impairments import PhaseFrequencyOffset, VariableFractionalDelay
 from .interp_decim import FirDecimator, FirInterpolator
 from .modulation import QPSK, PSKModulator
@@ -16,7 +16,6 @@ from .pulses import rrc
 from .scrambling import Descrambler, Scrambler
 from .sequences import UNIPOLAR_BARKER_SEQ
 from .symbol_sync import SymbolSync
-from .utils import binlist2x, x2binlist
 
 _log = logging.getLogger(__name__)
 
@@ -92,7 +91,7 @@ class PSKTrans:
         # Frequency synchronizer
         self.fsync_damp_factor = fsync_damp_factor
         self.fsync_norm_loop_bw = fsync_norm_loop_bw
-        self._fsync = FrequencySync(self.modulation, self._rx_filter_sps, self.fsync_damp_factor, self.fsync_norm_loop_bw)
+        self._fsync = PSKSync(self.modulation, self._rx_filter_sps, self.fsync_damp_factor, self.fsync_norm_loop_bw)
 
         # Symbol timing synchronizer
         self.ssync_damp_factor = ssync_damp_factor
@@ -132,7 +131,7 @@ class PSKTrans:
         ret = dict()
 
         # Build frame bits
-        ret['payload'] = x2binlist(msg, 8)
+        ret['payload'] = unpack(msg, 8)
         ret['fill'] = np.random.randint(0, 1, self._frame_size_bits - len(self._preamble) - len(ret['payload']))
         ret['bits'] = np.hstack((ret['payload'], ret['fill'])) # TODO: Avoid array copy
 
@@ -203,7 +202,7 @@ class PSKTrans:
             if tx_msg is None:
                 rxbits = ret['payload']
             else:
-                txbits = x2binlist(tx_msg, 8)
+                txbits = unpack(tx_msg, 8)
                 rxbits = ret['payload'][:len(tx_msg) * 8]
                 ret['BER'] = [np.count_nonzero(rxbits != txbits), len(rxbits)]
 

@@ -6,11 +6,11 @@ _log = logging.getLogger(__name__)
 
 class PhaseOffsetEst:
     def __init__(self, preamble: np.ndarray):
-        self.preamble = preamble
+        self._preamble = preamble
 
     def __call__(self, inp: np.ndarray, out: np.ndarray) -> int:
-        cprb = np.conj(self.preamble)
-        sprb = inp[:len(self.preamble)]
+        cprb = np.conj(self._preamble)
+        sprb = inp[:len(self._preamble)]
 
         phase_vector_est = np.mean(sprb * cprb)
         phase_est = np.angle(phase_vector_est)
@@ -20,5 +20,5 @@ class PhaseOffsetEst:
         return 0
 
     def __repr__(self):
-        args = 'preamble={}'.format(self.preamble)
+        args = 'preamble={}'.format(self._preamble)
         return '{}({})'.format(self.__class__.__name__, args)

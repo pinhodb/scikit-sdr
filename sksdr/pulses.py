@@ -1,3 +1,6 @@
+"""
+Pulses.
+"""
 import logging
 
 import numpy as np
@@ -5,6 +8,14 @@ import numpy as np
 _log = logging.getLogger(__name__)
 
 def rrc(sps: int, rolloff: float, span: int) -> np.ndarray:
+    """
+    Returns the root raised cosine filter coefficients.
+
+    :param sps: Samples per symbol
+    :param rolloff: Rolloff factor
+    :param span: Span (symbols)
+    :return: Coefficients of the filter
+    """
     # Design the filter
     n = np.arange(-span * sps / 2, span * sps / 2 + 1)
     b = np.zeros(len(n))
@@ -22,14 +33,33 @@ def rrc(sps: int, rolloff: float, span: int) -> np.ndarray:
     return b / np.sqrt(energy)
 
 class RRCPulse:
+    """
+    A class to encapsulate :func:`rrc`.
+    """
+
     def __init__(self, sps: int, rolloff: float, span:int):
+        """
+        :param sps: Samples per symbol
+        :param rolloff: Rolloff factor
+        :param span: Span (symbols)
+        """
         self.sps = sps
         self.rolloff = rolloff
         self.span = span
 
-    def coeffs(self):
+    def __call__(self) -> np.ndarray:
+        """
+        The main work function.
+
+        :return: Coefficients of the filter
+        """
         return rrc(self.sps, self. rolloff, self.span)
 
     def __repr__(self):
+        """
+        Returns a string representation of the object.
+
+        :return: A string representing the object and its properties
+        """
         args = 'sps={}, rolloff={}, span={}'.format(self.sps, self.rolloff, self.span)
         return '{}({})'.format(self.__class__.__name__, args)

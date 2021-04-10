@@ -27,20 +27,29 @@ from gnuradio import gr
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)
 
-class psk_mod(gr.decim_block):
+class psk_mod(gr.basic_block):
     """
     docstring for block psk_mod
     """
     def __init__(self, modulation, labels, amplitude, phase_offset):
+        gr.basic_block.__init__(self,
+                               name="psk_mod",
+                               in_sig=[np.uint8],
+                               out_sig=[np.complex64])
         mod = eval(modulation)
-        gr.decim_block.__init__(self,
-                                name="psk_mod",
-                                in_sig=[np.uint8],
-                                out_sig=[np.complex64], decim=mod.bits_per_symbol)
-        self.psk = sksdr.PSKModulator(mod, labels, amplitude, phase_offset)
+        self.psk = sksdr.PSKModulator.from_modulation(mod, labels, amplitude, phase_offset)
+        self.symbols_per_byte = 8 // mod.bits_per_symbol
+        self.set_output_multiple(self.symbols_per_byte)
 
-    def work(self, input_items, output_items):
+    def forecast(self, noutput_items, ninput_items_required):
+        for i in range(len(ninput_items_required)):
+            ninput_items_required[i] = noutput_items // self.symbols_per_byte
+
+    def general_work(self, input_items, output_items):
         in0 = input_items[0]
         out = output_items[0]
+        nout = len(out)
+        # print(len(in0), len(out), len(out) // self.symbols_per_byte)
         self.psk.modulate(in0, out)
-        return len(out)
+        self.consume(0, nout // self.symbols_per_byte)
+        return nout

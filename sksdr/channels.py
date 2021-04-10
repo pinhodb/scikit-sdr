@@ -2,7 +2,6 @@
 Channel models.
 """
 import logging
-from typing import Union
 
 import numpy as np
 
@@ -10,12 +9,13 @@ _log = logging.getLogger(__name__)
 
 class AWGNChannel:
     """
-    Additive white gaussian noise (AWGN) channel model.
+    AWGN channel model.
     """
-    def __init__(self, snr: float = np.inf, signal_power: int = None):
+
+    def __init__(self, snr: float = np.inf, signal_power: float = None):
         """
         :param snr: Desired SNR (dB)
-        :param signal_power: Desired signal power (linear units), or None if the signal is to be measured on each :meth:`__call__()`.
+        :param signal_power: Desired signal power (linear units), or :obj:`None` if the signal is to be measured on each :meth:`__call__()`
         """
         self.snr = snr
         self.signal_power = signal_power
@@ -23,7 +23,7 @@ class AWGNChannel:
     @property
     def snr(self) -> float:
         """
-        The current SNR (dB).
+        Desired SNR (dB).
         """
         return self._snr
 
@@ -32,11 +32,24 @@ class AWGNChannel:
         self._snr = value
         self._snr_linear = 10**(self.snr / 10)
 
-    def capacity(self):
-        r"""
-        The capacity of the channel.
+    @property
+    def signal_power(self) -> float:
+        """
+        Desired signal power (linear units), or :obj:`None` if the signal is to be measured on each :meth:`__call__()`.
+        """
+        return self._signal_power
 
-        The capacity is computed using the Shannon–Hartley formula: :math:`C = B\log_{2}\left(1+\frac{P}{N_0 B}\right)`
+    @signal_power.setter
+    def signal_power(self, value: float):
+        self._signal_power = value
+
+    def capacity(self) -> float:
+        r"""
+        Returns the capacity of the channel.
+
+        The capacity is computed using the Shannon–Hartley formula: :math:`C = B\log_{2}\left(1+\frac{P}{N_0 B}\right)`.
+
+        :return: Capacity of the channel
         """
         return 0.5 * np.log1p(self.snr) / np.log(2.0)
 
@@ -68,7 +81,7 @@ class AWGNChannel:
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and its properties.
+        :return: A string representing the object and its properties
         """
         args = 'snr={}, signal_power={}'.format(self.snr, self.signal_power)
         return '{}({})'.format(self.__class__.__name__, args)

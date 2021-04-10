@@ -13,7 +13,7 @@ scrambler = sksdr.Scrambler(scrambler_poly, scrambler_init_state)
 fid = open('test.dat', 'wb')
 
 for i, msg in enumerate(msgs):
-    ret['payload'] = sksdr.x2binlist(msg, 8)
+    ret['payload'] = sksdr.unpack(msg, 8)
     ret['fill'] = np.random.randint(0, 1, frame_size_bits - len(preamble) - len(ret['payload']))
     ret['bits'] = np.hstack((ret['payload'], ret['fill']))
     ret['sbits'] = scrambler(ret['bits'])

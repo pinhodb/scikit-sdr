@@ -16,8 +16,8 @@ def test_fractional_delay0():
 
     delay = 10
     data = np.array([1, 2, 3, 4, 5], dtype=float)
-    expected_data = np.array([99, 99, 99, 99, 99], dtype=float)
-    vfd = sksdr.VariableFractionalDelay(10, init_state=99)
+    expected_data = np.array([0, 0, 0, 0, 0], dtype=float)
+    vfd = sksdr.VariableFractionalDelay(10)
     out_data = np.empty_like(data)
     vfd(data, delay, out_data)
     assert np.allclose(out_data, expected_data)
@@ -25,14 +25,12 @@ def test_fractional_delay0():
 def test_fractional_delay1():
 
     # Create a delay offset object
-    vfd = sksdr.VariableFractionalDelay(max_delay=5)
+    vfd = sksdr.VariableFractionalDelay(5)
 
     # Generate random data symbols and apply QPSK modulation
-    ints = np.random.randint(0, 4, 10000)
-    bits = sksdr.x2binlist(ints, 2)
-    mod = sksdr.QPSK
-    psk = sksdr.PSKModulator(mod, [0, 1, 3, 2], 1.0, np.pi/4)
-    n_symbols = len(bits) // mod.bits_per_symbol
+    bits = np.random.randint(0, 4, 10000)
+    psk = sksdr.QPSKModulator([0, 1, 3, 2], 1.0, np.pi/4)
+    n_symbols = len(bits) * 8 // psk._mod.bits_per_symbol
     mod_sig = np.empty(n_symbols, dtype=complex)
     psk.modulate(bits, mod_sig)
 

@@ -26,7 +26,6 @@ from gnuradio.filter import firdes
 import sip
 from gnuradio import blocks
 import pmt
-from gnuradio import filter
 from gnuradio import gr
 import sys
 import signal
@@ -36,8 +35,6 @@ from gnuradio import eng_notation
 import epy_block_0
 import grsksdr
 import numpy as np
-import osmosdr
-import time
 import sksdr
 
 from gnuradio import qtgui
@@ -78,35 +75,26 @@ class psk_tx_mine(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.txt_size = txt_size = 11
-        self.msg_size = msg_size = txt_size + 4
-        self.modulation = modulation = sksdr.QPSK
-        self.frame_size_bits = frame_size_bits = 250
-        self.fec_ntotal = fec_ntotal = 4
-        self.fec_ndata = fec_ndata = 4
         self.upsampling = upsampling = 4
-        self.payload_size_bits = payload_size_bits = 224
-        self.msg_size_bits = msg_size_bits = msg_size * 8
-        self.frame_size_symbols = frame_size_symbols = int(frame_size_bits / modulation.bits_per_symbol)
-        self.fec_rate = fec_rate = fec_ntotal / fec_ndata
+        self.txt_size = txt_size = 11
         self.samp_rate = samp_rate = 1.024e6
         self.rrc_coeffs = rrc_coeffs = sksdr.rrc(upsampling, 0.5, 10)
         self.rf_gain = rf_gain = 40
-        self.preamble = preamble = np.repeat(sksdr.UNIPOLAR_BARKER_SEQ[13], 2)
-        self.payload_fec_size_bits = payload_fec_size_bits = int(payload_size_bits * fec_rate)
+        self.preamble_and_padding = preamble_and_padding = np.array([255, 195, 204, 192], dtype=np.uint8)
+        self.payload_size = payload_size = 28
+        self.msg_size = msg_size = txt_size + 4
+        self.modulation = modulation = sksdr.QPSK
         self.mod_phase_offset = mod_phase_offset = np.pi / 4
         self.mod_labels = mod_labels = [0, 1, 3, 2]
         self.mod_amplitude = mod_amplitude = 1
         self.freq_correction = freq_correction = 0
         self.freq = freq = 220e6
-        self.frame_size_samples = frame_size_samples = frame_size_symbols * upsampling
         self.frac_resampling = frac_resampling = 1/5
-        self.fill_size_bits = fill_size_bits = payload_size_bits - msg_size_bits
 
         ##################################################
         # Blocks
         ##################################################
-        self.qtgui_time_sink_x_1 = qtgui.time_sink_c(
+        self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
             1024, #size
             samp_rate, #samp_rate
             "", #name
@@ -140,12 +128,9 @@ class psk_tx_mine(gr.top_block, Qt.QWidget):
             -1, -1, -1, -1, -1]
 
 
-        for i in range(2):
+        for i in range(1):
             if len(labels[i]) == 0:
-                if (i % 2 == 0):
-                    self.qtgui_time_sink_x_1.set_line_label(i, "Re{{Data {0}}}".format(i/2))
-                else:
-                    self.qtgui_time_sink_x_1.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+                self.qtgui_time_sink_x_1.set_line_label(i, "Data {0}".format(i))
             else:
                 self.qtgui_time_sink_x_1.set_line_label(i, labels[i])
             self.qtgui_time_sink_x_1.set_line_width(i, widths[i])
@@ -196,27 +181,21 @@ class psk_tx_mine(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.osmosdr_sink_0 = osmosdr.sink(
-            args="numchan=" + str(1) + " " + "driver=rtlsdr"
-        )
-        self.osmosdr_sink_0.set_time_unknown_pps(osmosdr.time_spec_t())
-        self.osmosdr_sink_0.set_sample_rate(samp_rate)
-        self.osmosdr_sink_0.set_center_freq(freq, 0)
-        self.osmosdr_sink_0.set_freq_corr(0, 0)
-        self.osmosdr_sink_0.set_gain(10, 0)
-        self.osmosdr_sink_0.set_if_gain(20, 0)
-        self.osmosdr_sink_0.set_bb_gain(20, 0)
-        self.osmosdr_sink_0.set_antenna('', 0)
-        self.osmosdr_sink_0.set_bandwidth(0, 0)
-        self.mmse_resampler_xx_0 = filter.mmse_resampler_cc(0, frac_resampling)
-        self.grsksdr_scrambler_0 = grsksdr.scrambler([1, 1, 1,  0, 1], [0, 1, 1, 0])
+        self.grsksdr_scrambler_0 = grsksdr.scrambler([1, 0, 1, 1, 0, 1, 0 ,1], [0, 3, 2, 2, 5, 1, 7])
         self.grsksdr_psk_mod_0 = grsksdr.psk_mod('sksdr.QPSK', mod_labels, mod_amplitude, mod_phase_offset)
         self.grsksdr_fir_interpolator_0 = grsksdr.fir_interpolator(upsampling, rrc_coeffs)
-        self.epy_block_0 = epy_block_0.blk(txt_size=txt_size, payload_size=payload_size_bits)
-        self.blocks_vector_source_x_0 = blocks.vector_source_b(preamble, True, 1, [])
-        self.blocks_stream_mux_0 = blocks.stream_mux(gr.sizeof_char*1, [len(preamble), payload_fec_size_bits])
+        self.epy_block_0 = epy_block_0.blk(txt_size=txt_size, payload_size=payload_size)
+        self.blocks_vector_source_x_0 = blocks.vector_source_b(preamble_and_padding, True, 1, [])
+        self.blocks_uchar_to_float_0 = blocks.uchar_to_float()
+        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
+        self.blocks_stream_mux_0 = blocks.stream_mux(gr.sizeof_char*1, [len(preamble_and_padding), payload_size])
+        self.blocks_null_sink_0 = blocks.null_sink(gr.sizeof_gr_complex*1)
         self.blocks_file_source_0_0 = blocks.file_source(gr.sizeof_char*1, 'msg.txt', True, 0, 0)
         self.blocks_file_source_0_0.set_begin_tag(pmt.PMT_NIL)
+        self.blocks_file_sink_0_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'test_before_upsampling.iq', False)
+        self.blocks_file_sink_0_0.set_unbuffered(False)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'test.iq', False)
+        self.blocks_file_sink_0.set_unbuffered(False)
 
 
 
@@ -224,21 +203,31 @@ class psk_tx_mine(gr.top_block, Qt.QWidget):
         # Connections
         ##################################################
         self.connect((self.blocks_file_source_0_0, 0), (self.epy_block_0, 0))
+        self.connect((self.blocks_stream_mux_0, 0), (self.blocks_uchar_to_float_0, 0))
         self.connect((self.blocks_stream_mux_0, 0), (self.grsksdr_psk_mod_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_file_sink_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.blocks_null_sink_0, 0))
+        self.connect((self.blocks_uchar_to_float_0, 0), (self.qtgui_time_sink_x_1, 0))
         self.connect((self.blocks_vector_source_x_0, 0), (self.blocks_stream_mux_0, 0))
         self.connect((self.epy_block_0, 0), (self.grsksdr_scrambler_0, 0))
-        self.connect((self.grsksdr_fir_interpolator_0, 0), (self.mmse_resampler_xx_0, 0))
+        self.connect((self.grsksdr_fir_interpolator_0, 0), (self.blocks_throttle_0, 0))
         self.connect((self.grsksdr_fir_interpolator_0, 0), (self.qtgui_freq_sink_x_0, 0))
-        self.connect((self.grsksdr_fir_interpolator_0, 0), (self.qtgui_time_sink_x_1, 0))
+        self.connect((self.grsksdr_psk_mod_0, 0), (self.blocks_file_sink_0_0, 0))
         self.connect((self.grsksdr_psk_mod_0, 0), (self.grsksdr_fir_interpolator_0, 0))
         self.connect((self.grsksdr_scrambler_0, 0), (self.blocks_stream_mux_0, 1))
-        self.connect((self.mmse_resampler_xx_0, 0), (self.osmosdr_sink_0, 0))
 
 
     def closeEvent(self, event):
         self.settings = Qt.QSettings("GNU Radio", "psk_tx_mine")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
+
+    def get_upsampling(self):
+        return self.upsampling
+
+    def set_upsampling(self, upsampling):
+        self.upsampling = upsampling
+        self.set_rrc_coeffs(sksdr.rrc(self.upsampling, 0.5, 10))
 
     def get_txt_size(self):
         return self.txt_size
@@ -248,84 +237,12 @@ class psk_tx_mine(gr.top_block, Qt.QWidget):
         self.set_msg_size(self.txt_size + 4)
         self.epy_block_0.txt_size = self.txt_size
 
-    def get_msg_size(self):
-        return self.msg_size
-
-    def set_msg_size(self, msg_size):
-        self.msg_size = msg_size
-        self.set_msg_size_bits(self.msg_size * 8)
-
-    def get_modulation(self):
-        return self.modulation
-
-    def set_modulation(self, modulation):
-        self.modulation = modulation
-
-    def get_frame_size_bits(self):
-        return self.frame_size_bits
-
-    def set_frame_size_bits(self, frame_size_bits):
-        self.frame_size_bits = frame_size_bits
-        self.set_frame_size_symbols(int(self.frame_size_bits / modulation.bits_per_symbol))
-
-    def get_fec_ntotal(self):
-        return self.fec_ntotal
-
-    def set_fec_ntotal(self, fec_ntotal):
-        self.fec_ntotal = fec_ntotal
-        self.set_fec_rate(self.fec_ntotal / self.fec_ndata)
-
-    def get_fec_ndata(self):
-        return self.fec_ndata
-
-    def set_fec_ndata(self, fec_ndata):
-        self.fec_ndata = fec_ndata
-        self.set_fec_rate(self.fec_ntotal / self.fec_ndata)
-
-    def get_upsampling(self):
-        return self.upsampling
-
-    def set_upsampling(self, upsampling):
-        self.upsampling = upsampling
-        self.set_frame_size_samples(self.frame_size_symbols * self.upsampling)
-        self.set_rrc_coeffs(sksdr.rrc(self.upsampling, 0.5, 10))
-
-    def get_payload_size_bits(self):
-        return self.payload_size_bits
-
-    def set_payload_size_bits(self, payload_size_bits):
-        self.payload_size_bits = payload_size_bits
-        self.set_fill_size_bits(self.payload_size_bits - self.msg_size_bits)
-        self.set_payload_fec_size_bits(int(self.payload_size_bits * self.fec_rate))
-        self.epy_block_0.payload_size = self.payload_size_bits
-
-    def get_msg_size_bits(self):
-        return self.msg_size_bits
-
-    def set_msg_size_bits(self, msg_size_bits):
-        self.msg_size_bits = msg_size_bits
-        self.set_fill_size_bits(self.payload_size_bits - self.msg_size_bits)
-
-    def get_frame_size_symbols(self):
-        return self.frame_size_symbols
-
-    def set_frame_size_symbols(self, frame_size_symbols):
-        self.frame_size_symbols = frame_size_symbols
-        self.set_frame_size_samples(self.frame_size_symbols * self.upsampling)
-
-    def get_fec_rate(self):
-        return self.fec_rate
-
-    def set_fec_rate(self, fec_rate):
-        self.fec_rate = fec_rate
-        self.set_payload_fec_size_bits(int(self.payload_size_bits * self.fec_rate))
-
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.osmosdr_sink_0.set_sample_rate(self.samp_rate)
+        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_time_sink_x_1.set_samp_rate(self.samp_rate)
 
@@ -341,18 +258,31 @@ class psk_tx_mine(gr.top_block, Qt.QWidget):
     def set_rf_gain(self, rf_gain):
         self.rf_gain = rf_gain
 
-    def get_preamble(self):
-        return self.preamble
+    def get_preamble_and_padding(self):
+        return self.preamble_and_padding
 
-    def set_preamble(self, preamble):
-        self.preamble = preamble
-        self.blocks_vector_source_x_0.set_data(self.preamble, [])
+    def set_preamble_and_padding(self, preamble_and_padding):
+        self.preamble_and_padding = preamble_and_padding
+        self.blocks_vector_source_x_0.set_data(self.preamble_and_padding, [])
 
-    def get_payload_fec_size_bits(self):
-        return self.payload_fec_size_bits
+    def get_payload_size(self):
+        return self.payload_size
 
-    def set_payload_fec_size_bits(self, payload_fec_size_bits):
-        self.payload_fec_size_bits = payload_fec_size_bits
+    def set_payload_size(self, payload_size):
+        self.payload_size = payload_size
+        self.epy_block_0.payload_size = self.payload_size
+
+    def get_msg_size(self):
+        return self.msg_size
+
+    def set_msg_size(self, msg_size):
+        self.msg_size = msg_size
+
+    def get_modulation(self):
+        return self.modulation
+
+    def set_modulation(self, modulation):
+        self.modulation = modulation
 
     def get_mod_phase_offset(self):
         return self.mod_phase_offset
@@ -383,26 +313,12 @@ class psk_tx_mine(gr.top_block, Qt.QWidget):
 
     def set_freq(self, freq):
         self.freq = freq
-        self.osmosdr_sink_0.set_center_freq(self.freq, 0)
-
-    def get_frame_size_samples(self):
-        return self.frame_size_samples
-
-    def set_frame_size_samples(self, frame_size_samples):
-        self.frame_size_samples = frame_size_samples
 
     def get_frac_resampling(self):
         return self.frac_resampling
 
     def set_frac_resampling(self, frac_resampling):
         self.frac_resampling = frac_resampling
-        self.mmse_resampler_xx_0.set_resamp_ratio(self.frac_resampling)
-
-    def get_fill_size_bits(self):
-        return self.fill_size_bits
-
-    def set_fill_size_bits(self, fill_size_bits):
-        self.fill_size_bits = fill_size_bits
 
 def snipfcn_snippet_0(self):
     import logging

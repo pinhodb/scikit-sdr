@@ -3,6 +3,7 @@ import logging
 import matplotlib.pyplot as plt
 import numpy as np
 import sksdr
+from sksdr.utils import Endian
 
 _log = logging.getLogger(__name__)
 
@@ -15,11 +16,12 @@ def test_costas_loop():
     vfd = sksdr.VariableFractionalDelay(max_delay=5)
 
     # Generate random data symbols and apply BPSK modulation
-    mod = sksdr.BPSK
     ints = np.random.randint(0, 2, 1000)
-    bits = sksdr.x2binlist(ints, 1)
-    psk = sksdr.PSKModulator(mod, [0, 1], 1.0)
-    n_symbols = len(bits) // mod.bits_per_symbol
+    bits = np.zeros(len(ints) * 8, dtype=np.uint8)
+    unpack = sksdr.Unpack(8, 1, Endian.MSB)
+    unpack(ints, bits)
+    psk = sksdr.BPSKModulator([0, 1], 1.0)
+    n_symbols = len(bits) // psk._mod.bits_per_symbol
     mod_sig = np.empty(n_symbols, dtype=complex)
     psk.modulate(bits, mod_sig)
 

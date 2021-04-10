@@ -11,19 +11,18 @@ from .modulation import BPSK, QPSK, Modulation
 _log = logging.getLogger(__name__)
 
 class PSKSync:
-    """
-    Compensates for carrier frequency and phase offsets in signals in BPSK and QPSK.
+    r"""
+    Compensate for carrier frequency and phase offsets in BPSK and QPSK signals.
 
-    The algorithm is a closed loop synchronizer that uses the discrete phase-locked loop (PLL) based algorithm described in :cite:`rice08`.
-    The maximum likelihood (ML) phase error detector (PED) is chosen, which consists of minimizing the energy in :math:`\theta_e` . It also has the advantage of avoiding arctangent operations required by other phase detectors based on a purely geometric The ML phase detector first de-rotates the input signal by the estimated phase from the DDS output (CCW rotation block). This leaves only the phase of the received data symbol :math:`\theta_r = \theta-\hat\theta`. It then subtracts the phase of the transmitted data symbol to obtain the phase error, :math:`\theta_e=\theta_r-\theta_d` . This is usually used in a data-aided system, in which there is a training sequence where the transmission symbols are well known. If the symbols are unknown then it is called a decision-directed system and the transmitted symbols must be estimated.
+    Uses the discrete phase-locked loop (PLL) based algorithm described in :cite:`rice08`. The maximum likelihood (ML) phase error detector (PED) is chosen, which consists of minimizing the energy in :math:`\theta_e` . It also has the advantage of avoiding arctangent operations required by other phase detectors based on a purely geometric The ML phase detector first de-rotates the input signal by the estimated phase from the DDS output (CCW rotation block). This leaves only the phase of the received data symbol :math:`\theta_r = \theta-\hat\theta`. It then subtracts the phase of the transmitted data symbol to obtain the phase error, :math:`\theta_e=\theta_r-\theta_d` . This is usually used in a data-aided system, in which there is a training sequence where the transmission symbols are well known. If the symbols are unknown then it is called a decision-directed system and the transmitted symbols must be estimated.
 
-    Kp is the slope of phase detector S-Curve in the linear range
+    Kp is the slope of phase detector's s-Curve in the linear range
     BPSK: Kp = K * A^2
     QPSK: Kp = 2 * K * A^2
     K = Amplitude of received signal (unit gain from AGC)
     A = Norm of constellation point
-    K1 (loop filter proportional gain)
-    K2 (loop filter integral gain)
+    K1 is the loop filter proportional gain
+    K2 is the loop filter integral gain
     # Loop bandwidth normalized by sample rate
     phase_recovery_loop_bw = self.norm_loop_bw * self.sps
     """
@@ -76,7 +75,14 @@ class PSKSync:
                    phase_recovery_loop_bw, phase_recovery_gain, theta, d, self.p_gain, self.i_gain)
 
     def __call__(self, inp: np.ndarray, out: np.ndarray, phase_estimate: np.ndarray = None) -> int:
+        """
+        The main work function.
 
+        :param inp: Input signal
+        :param out: Output signal
+        :param err: Error signal
+        :return: 0 if OK, error code otherwise
+        """
         def common_logic():
             # Phase accumulate and correct
             out[idx] = val * np.exp(1j * self._phase)
@@ -110,6 +116,10 @@ class PSKSync:
         return 0
 
     def __repr__(self):
-        args = 'sps={}, mod={}, damp_factor={}, norm_loop_gain={}' \
-               .format(self.sps, repr(self.mod), self.damp_factor, self.norm_loop_bw)
+        """
+        Returns a string representation of the object.
+
+        :return: A string representing the object and its properties
+        """
+        args = 'sps={}, mod={}, damp_factor={}, norm_loop_gain={}'.format(self.sps, repr(self.mod), self.damp_factor, self.norm_loop_bw)
         return '{}({})'.format(self.__class__.__name__, args)

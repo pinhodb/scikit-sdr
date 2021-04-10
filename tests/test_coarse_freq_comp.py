@@ -5,7 +5,7 @@ import sksdr
 
 _log = logging.getLogger(__name__)
 
-def test_coarse_freq_comp():
+def _test_coarse_freq_comp():
     mod = sksdr.QPSK
     sample_rate = 200.0e3
     resolution = 25.0
@@ -416,5 +416,10 @@ def test_coarse_freq_comp():
 
     cfc = sksdr.CoarseFrequencyComp(mod.order, sample_rate, resolution)
     out_frame = np.empty_like(in_frame)
-    cfc(in_frame, out_frame)
+    fft_frame = np.empty(cfc.fft_size, dtype=complex)
+    cfc(in_frame, out_frame, fft_frame)
+    return out_frame, expected_frame
+
+def test_coarse_freq_comp(benchmark):
+    out_frame, expected_frame = benchmark(_test_coarse_freq_comp)
     assert np.allclose(out_frame, expected_frame)

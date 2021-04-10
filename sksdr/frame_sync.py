@@ -2,7 +2,6 @@
 Frame synchronization algorithms.
 """
 import logging
-from typing import Tuple
 
 import numpy as np
 import scipy.signal as signal
@@ -13,15 +12,43 @@ class PreambleSync:
     """
     Frame synchronization by correlation with a preamble.
 
-    Performs a correlation with a known preamble to detect the beginning of a frame.
+    Performs a correlation with a known preamble to detect the start of a frame.
     """
+
     def __init__(self, preamble: np.ndarray, threshold: float, frame_size: int):
-        self.preamble = np.flipud(np.conj(preamble))
-        self.threshold = threshold
-        self.frame_size = frame_size
+        """
+        :param preamble: Flipped conjugate of the preamble. This array will be used as the correlation filter coefficients.
+        :param threshold: Correlation threshold. Any sample where the correlation is >= than this value, will be considered the start of a frame.
+        :param frame_size: Frame size (samples)
+        """
+        self._preamble = np.flipud(np.conj(preamble))
+        self._threshold = threshold
+        self._frame_size = frame_size
         self._filter_state = np.zeros(len(self.preamble) - 1)
         self._buf = np.empty(0)
         self._xcorr = np.empty(0)
+
+
+    @property
+    def preamble(self) -> np.ndarray:
+        """
+        Flipped conjugate of the preamble. This array will be used as the correlation filter coefficients.
+        """
+        return self._preamble
+
+    @property
+    def threshold(self) -> float:
+        """
+        Correlation threshold. Any sample where the correlation is >= than this value, will be considered the start of a frame.
+        """
+        return self._threshold
+
+    @property
+    def frame_size(self) -> int:
+        """
+        Frame size (samples).
+        """
+        return self._frame_size
 
     def __call__(self, inp: np.ndarray, out: np.ndarray) -> int:
         """
@@ -43,6 +70,7 @@ class PreambleSync:
         idxs = np.where(self._xcorr >= self.threshold)[0]
 
         if len(idxs) == 0:
+            _log.log(logging.DEBUG, 'frame not found 3')
             return False
 
         # Find the best index
@@ -57,22 +85,24 @@ class PreambleSync:
         if frame_start < 0:
             self._buf = self._buf[best_idx + 1:]
             self._xcorr = self._xcorr[best_idx + 1:]
+            # _log.debug('PreambleSync: frame_start=%d', frame_start)
             return False
-        elif frame_end > len(self._buf):
+        if frame_end > len(self._buf):
             self._buf = self._buf[frame_start:]
             self._xcorr = self._xcorr[frame_start:]
+            # _log.debug('PreambleSync: frame_end=%d', frame_end)
             return False
-        else:
-            out[:] = self._buf[frame_start:frame_end]
-            self._buf = self._buf[frame_end:]
-            self._xcorr = self._xcorr[frame_end:]
-            return True
+        out[:] = self._buf[frame_start:frame_end]
+        self._buf = self._buf[frame_end:]
+        self._xcorr = self._xcorr[frame_end:]
+        # _log.debug('PreambleSync: frame_start=%d, frame_end=%d', frame_start, frame_end)
+        return True
 
     def __repr__(self):
         """
         Returns a string representation of the object.
 
-        :return: A string representing the object and its properties.
+        :return: A string representing the object and its properties
         """
         args = 'preamble={}, threshold={}, frame_size={}'.format(self.preamble, self.threshold, self.frame_size)
         return '{}({})'.format(self.__class__.__name__, args)

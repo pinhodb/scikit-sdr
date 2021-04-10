@@ -21,9 +21,8 @@
 import logging
 
 import numpy as np
-from gnuradio import gr
-
 import sksdr
+from gnuradio import gr
 
 _log = logging.getLogger(__name__)
 #_log.setLevel(logging.DEBUG)
@@ -42,5 +41,5 @@ class fir_interpolator(gr.interp_block):
     def work(self, input_items, output_items):
         in0 = input_items[0]
         out = output_items[0]
-        _, out[:] = self.interp(in0)
+        self.interp(in0, out)
         return len(out)

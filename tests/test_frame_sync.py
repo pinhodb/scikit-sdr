@@ -2,16 +2,18 @@ import logging
 
 import numpy as np
 import sksdr
+from sksdr.utils import Endian
 
 _log = logging.getLogger(__name__)
 
 def test_frame_sync():
     threshold = 8.0
     frame_size = 100
-    mod = sksdr.QPSK
-    psk = sksdr.PSKModulator(mod, [0, 1, 3, 2], phase_offset=np.pi/4)
-    preamble = np.repeat(sksdr.UNIPOLAR_BARKER_SEQ[13], 2)
-    n_symbols = len(preamble) // mod.bits_per_symbol
+    psk = sksdr.QPSKModulator([0, 1, 3, 2], phase_offset=np.pi/4)
+    pack = sksdr.Pack(1, 8, Endian.MSB)
+    preamble = np.empty(4, dtype=np.uint8)
+    pack.call__list(np.concatenate((np.repeat(sksdr.UNIPOLAR_BARKER_SEQ[13], 2),(0,0,0,0,0,0))), preamble)
+    n_symbols = len(preamble) * 8 // psk._mod.bits_per_symbol
     modulated_preamble = np.empty(n_symbols, dtype=complex)
     psk.modulate(preamble, modulated_preamble)
     frame_sync = sksdr.PreambleSync(modulated_preamble, threshold, frame_size)

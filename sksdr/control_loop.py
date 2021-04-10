@@ -9,53 +9,43 @@ import numpy as np
 _log = logging.getLogger(__name__)
 
 class PLL:
-    """
-    Generic Phase-locked Loop structure.
+    r"""
+    Generic phase-locked loop (PLL) structure.
 
-    Implements a 2nd-order generic PLL algorithm as described in :cite:`rice08`. The PLL consists of three basic components: the phase detector, the loop filter and the numerically-controlled oscillator (NCO). This class implements a  proportional-plus-integrator loop filter and a NCO implemented as an integrator. The phase detector is implementation-specific and so the typical usage pattern is to create an application-specific class (e.g., :ref:`CostasLoop`) that uses/extends this class and implements it's own phase-detector.
+    Implements a 2nd-order generic PLL algorithm as described in :cite:`rice08`. The PLL consists of three basic components: the phase detector, the loop filter and the numerically-controlled oscillator (NCO).
 
-    Two parameters are usually used to characterize a 2nd-order loop. The *damping factor* denoted by :math:`\zeta` and *natural frequency* denoted by :math:`\omega_n`. These parameters are given by:
+    TODO figure
+
+    The loop filter is implemented as a proportional-plus-integrator filter, and the NCO is implemented as an integrator. The phase detector is implementation-specific so the typical pattern is to create an application-specific class (e.g., :ref:`CostasLoop`) that uses/extends this class and implements it's own phase detector.
+
+    Two parameters are usually used to characterize a 2nd-order loop. The *damping factor* denoted by :math:`\zeta`, and the *natural frequency* denoted by :math:`\omega_n`. These parameters are given by:
 
     .. math::
-        \zeta & =\frac{k_1}{2}\sqrt{\frac{k_0 k_p}{k_2}}
-        \omega_n & = \sqrt{k_0 k_p k_2}
+        \zeta &= \frac{k_1}{2}\sqrt{\frac{k_0 k_p}{k_2}}\\
+        \omega_n &= \sqrt{k_0 k_p k_2}
 
-    where :math:`k0` is the NCO gain, :math:`kp is the phase detector gain, k1 is the loop filter proportional gain and k2 is the loop filter integrator gain`.
+    where :math:`k_0` is the NCO gain, :math:`k_p` is the phase detector gain, :math:`k_1` is the loop filter proportional gain, and :math:`k_2` is the loop filter integrator gain.
+
+    Another way to characterize the PLL is using the bandwidth of the frequency response. One useful measure is the *equivalent noise bandwidth* :math:`B_n`, which is defined as the bandwidth (in Hz) of a fictitious low-pass rectangular filter with the same area as the magnitude-square of the transfer function. For the case of a PLL with a proportional-plus-integrator loop filter this is given by
+
+    .. math::
+        B_n = \frac{\omega_n}{2}\left(\frac{1}{4\zeta}+\zeta\right)
     """
+
     def __init__(self, loop_bandwidth: float, max_freq: float, min_freq: float):
         """
         """
+        # Set the bandwidth, which will then call update_gains()
+        self.loop_bandwidth = loop_bandwidth
+        # Set the damping factor for a critically damped system
+        self.damping = np.sqrt(2.0) / 2.0
+        self.max_freq = max_freq
+        self.min_freq = min_freq
         self._phase = 0
         self._frequency = 0
 
-        self.max_freq = max_freq
-        self.min_freq = min_freq
-
-        # Set the damping factor for a critically damped system
-        self._loop_bandwidth = 0
-        self.damping = np.sqrt(2.0) / 2.0
-
-        # Set the bandwidth, which will then call update_gains()
-        self.loop_bandwidth = loop_bandwidth
-
     @property
-    def min_freq(self):
-        return self._min_freq
-
-    @min_freq.setter
-    def min_freq(self, value: float):
-        self._min_freq = value
-
-    @property
-    def max_freq(self):
-        return self._max_freq
-
-    @max_freq.setter
-    def max_freq(self, value: float):
-        self._max_freq = value
-
-    @property
-    def loop_bandwidth(self):
+    def loop_bandwidth(self) -> float:
         return self._loop_bandwidth
 
     @loop_bandwidth.setter
@@ -66,7 +56,23 @@ class PLL:
         self.update_gains()
 
     @property
-    def damping(self):
+    def min_freq(self) -> float:
+        return self._min_freq
+
+    @min_freq.setter
+    def min_freq(self, value: float):
+        self._min_freq = value
+
+    @property
+    def max_freq(self) -> float:
+        return self._max_freq
+
+    @max_freq.setter
+    def max_freq(self, value: float):
+        self._max_freq = value
+
+    @property
+    def damping(self) -> float:
         return self._damping
 
     @damping.setter
@@ -77,17 +83,17 @@ class PLL:
         self.update_gains()
 
     @property
-    def alpha(self):
+    def alpha(self) -> float:
         return self._alpha
 
     @alpha.setter
     def alpha(self, value: float):
         if value < 0 or value > 1.0:
-            raise ValueError(f'Invalid alpha {value}. Must be [0,1].')
+            raise ValueError(f'Invalid alpha {value}. Must be in [0,1].')
         self._alpha = value
 
     @property
-    def beta(self):
+    def beta(self) -> float:
         return self._beta
 
     @beta.setter
@@ -97,7 +103,7 @@ class PLL:
         self._beta = value
 
     @property
-    def frequency(self):
+    def frequency(self) -> float:
         return self._frequency
 
     @frequency.setter
@@ -110,7 +116,7 @@ class PLL:
             self._frequency = value
 
     @property
-    def phase(self):
+    def phase(self) -> float:
         return self._phase
 
     @phase.setter
@@ -121,14 +127,15 @@ class PLL:
         while self._phase < -2 * np.pi:
             self._phase += 2 * np.pi
 
-    def __call__(self, inp: np.ndarray, nout: Optional[int] = None) -> Tuple[np.ndarray, int, np.ndarray]:
-        pass
+    def __call__(self, inp: np.ndarray, nout: Optional[int] = None) -> int:
+        """
+        The main work function.
 
-    def __repr__(self):
-        # args = 'mod={}, sps={}, damp_factor={}, norm_loop_gain={}, K={} A={}' \
-        #        .format(self.mod, self.sps, self.damp_factor, self.norm_loop_bw, self.K, self.A)
-        # return '{}({})'.format(self.__class__.__name__, args)
-        return ''
+        :param inp: Input signal
+        :param out: Output signal
+        :return: 0 if OK, error code otherwise
+        """
+        pass
 
     def update_gains(self):
         denom = 1.0 + 2.0 * self.damping * self.loop_bandwidth + self.loop_bandwidth**2
@@ -148,9 +155,21 @@ class PLL:
             self.frequency = self.min_freq
 
     def advance_loop(self, error: float):
+        """
+        well advance it then
+        """
         self.frequency = self.frequency + self.beta * error
         self.phase = self.phase + self.frequency + self.alpha * error
         return self.frequency + self.alpha * error
+
+    def tanhf_lut(self, x: int):
+        if x > 2:
+            return 1
+        elif x <= -2:
+            return -1
+        else:
+            index = 128 + 64 * x
+            return self._tanh_lut_table[index]
 
     _tanh_lut_table = [
         -0.96402758, -0.96290241, -0.96174273, -0.96054753, -0.95931576, -0.95804636,
@@ -197,12 +216,3 @@ class PLL:
         0.95257001,  0.95400122,  0.95539023,  0.95673822,  0.95804636,  0.95931576,
         0.96054753,  0.96174273,  0.96290241,  0.96402758
     ]
-
-    def tanhf_lut(self, x: int):
-        if x > 2:
-            return 1
-        elif x <= -2:
-            return -1
-        else:
-            index = 128 + 64 * x
-            return self._tanh_lut_table[index]
